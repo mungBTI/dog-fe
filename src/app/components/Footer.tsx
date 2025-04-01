@@ -25,16 +25,26 @@ const footerArry = [
 ];
 export default function Footer() {
   return (
-    <div className="flex flex-row items-center justify-between w-full">
+    <div
+      className="flex flex-row items-center justify-between w-full px-4 md:px-0"
+      role="navigation"
+      aria-label="footer navigation"
+    >
       {footerArry.map((item) => {
         return (
-          <div
+          <button
             className="flex flex-col items-center justify-center w-fit"
             key={item.label}
+            aria-label={`go to ${item.label}`}
           >
-            <Image src={item.iconsrc} alt={item.label} width={20} height={20} />
-            <span>{item.label}</span>
-          </div>
+            <Image
+              src={item.iconsrc}
+              alt={`${item.label} icon`}
+              width={20}
+              height={20}
+            />
+            <span role="icon-label">{item.label}</span>
+          </button>
         );
       })}
     </div>

@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Ownglyph_wiseelist } from "@/lib/config/fonts";
 import "./globals.css";
-
-const myFont = localFont({
-  src: "../../public/fonts/Ownglyph_wiseelist.ttf",
-});
 
 export const metadata: Metadata = {
   title: "두둥명",
@@ -18,7 +14,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${myFont.className}`}>{children}</body>
+      <body
+        className={`${Ownglyph_wiseelist.className} flex justify-center w-full min-h-screen`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

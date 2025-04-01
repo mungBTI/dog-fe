@@ -14,6 +14,12 @@ module.exports = {
       backgroundImage: {
         paper: "url('/image/paper_texture.jpeg')",
       },
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: "0", filter: "blur(10px)" },
+          "100%": { opacity: "1", filter: "blur(0px)" },
+        },
+      },
     },
     fontFamily: {
       ownglyph_wiseelist: ["var(--font-Ownglyph_wiseelist)"],
