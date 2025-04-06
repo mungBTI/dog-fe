@@ -1,6 +1,6 @@
 import MobileLayout from "../components/MobileLayout";
 
-export default function MainLayout({
+export default function MyPageLayout({
   children,
 }: {
   children: React.ReactNode;

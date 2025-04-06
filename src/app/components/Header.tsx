@@ -1,10 +1,11 @@
 import React from "react";
 import Image from "next/image";
 import dudungMungImage from "../../../public/image/dudungMung.png";
+import { FlexRowCenter } from "./Flex";
 
 export default function Header() {
   return (
-    <div className="flex items-center justify-center">
+    <FlexRowCenter>
       <div className="flex items-center">
         <Image
           src={dudungMungImage}
@@ -13,6 +14,6 @@ export default function Header() {
           className="object-contain size-fit"
         />
       </div>
-    </div>
+    </FlexRowCenter>
   );
 }

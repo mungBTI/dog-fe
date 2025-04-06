@@ -10,10 +10,10 @@ export default function Kakao() {
     >
       <Image
         src="/image/login/kakao_login_medium_wide.png"
-        alt="kakao_login_buttom"
-        width={340}
-        height={60}
-        quality={100}
+        alt="Kakao Login"
+        width={300}
+        height={45}
+        className="w-[300px] h-[45px] md:w-[400px] md:h-[60px]"
       ></Image>
     </Link>
   );
