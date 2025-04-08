@@ -4,9 +4,8 @@ import { useEffect } from "react";
 
 export default function Home() {
   useEffect(() => {
-    const userInfo = localStorage.getItem("userInfo");
-    const dogInfo = localStorage.getItem("dogInfo");
-    if (userInfo && dogInfo) {
+    const accessToke = localStorage.getItem("accessToke");
+    if (accessToke) {
       redirect("/main");
     } else {
       redirect("/login");
