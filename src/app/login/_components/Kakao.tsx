@@ -6,14 +6,16 @@ export default function Kakao() {
     <Link
       href={`https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_KAKAO_API_KEY}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URL}`}
     >
-      <Image
-        src="/image/login/kakao_login_medium_wide.png"
-        alt="Kakao Login"
-        width={300}
-        height={45}
-        className="w-[300px] h-[45px] md:w-[400px] md:h-[60px]"
-        quality={100}
-      ></Image>
+      <div className="w-[300px] h-[45px] md:w-[400px] md:h-[60px] rounded-[12px] overflow-hidden">
+        <Image
+          src="/image/login/kakao_login.svg"
+          alt="Kakao Login"
+          width={300}
+          height={45}
+          className="w-full h-full"
+          quality={100}
+        />
+      </div>
     </Link>
   );
 }
