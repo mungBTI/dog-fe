@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { kakaoAuth } from "@/app/login/lib/kakaoAuth";
+import { kakaoAuth } from "@/api/auth/kakaoAuth";
 
 const KakaoCallback = () => {
   const router = useRouter();
