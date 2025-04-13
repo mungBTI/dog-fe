@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
         className={`${Ownglyph_wiseelist.className} flex justify-center w-full min-h-screen`}
       >

@@ -1,5 +1,7 @@
-import FlexListFull from "./Flex";
+import { layout } from "@/styles/layout";
 
 export default function Main({ children }: { children: React.ReactNode }) {
-  return <FlexListFull className="justify-between">{children}</FlexListFull>;
+  return (
+    <div className={`${layout.flex.list.full} justify-between`}>{children}</div>
+  );
 }

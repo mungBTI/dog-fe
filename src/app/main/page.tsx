@@ -1,61 +1,81 @@
 "use client";
-import { useEffect, useState } from "react";
-import FlexListFull from "../components/Flex";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-import Main from "../components/Main";
 import Dog from "./_components/Dog";
 import TodayQuestion from "./_components/TodayQuestion";
-import UserInfoBox from "./_components/UserInfo";
+import { getDogSimpleInfo, getUserSimpleInfo } from "@/api/info/getInfo";
+import { useRouter } from "next/navigation";
 import {
-  UserInfo as UserInfoType,
-  DogInfo as DogInfoType,
-} from "@/types/mainInfo";
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import axios from "axios";
+import UserInfoBox from "./_components/UserInfo";
+import { layout } from "@/styles/layout";
+import { useEffect } from "react";
 
-export default function Page() {
-  const [userInfo, setUserInfo] = useState<UserInfoType>({
-    name: "홍길동",
-    email: "hong@gmail.com",
-    profileImage: "/image/dog_illus/maru.png",
-    togetherTime: 0,
+// 실제 컨텐츠를 보여줄 컴포넌트 분리
+function MainContent() {
+  const router = useRouter();
+
+  const { data: userInfo, isLoading: userLoading } = useQuery({
+    queryKey: ["userSimpleInfo"],
+    queryFn: getUserSimpleInfo,
   });
-  const [dogInfo, setDogInfo] = useState<DogInfoType>({
-    name: "마루",
-    profileImage: "/image/dog_illus/maru.png",
-    togetherDate: new Date(),
-    birthDate: new Date(),
-    gender: "남자",
+
+  const { data: dogInfo, error: dogError } = useQuery({
+    queryKey: ["dogSimpleInfo"],
+    queryFn: getDogSimpleInfo,
+    retry: false,
   });
 
   useEffect(() => {
-    const calculatedTime =
-      Math.floor(
-        (new Date().getTime() - dogInfo.togetherDate.getTime()) /
-          (1000 * 60 * 60 * 24)
-      ) + 1;
+    if (dogError && userInfo) {
+      if (
+        axios.isAxiosError(dogError) &&
+        dogError.response?.status === 404 &&
+        dogError.response?.data?.message === "등록된 강아지가 없습니다."
+      ) {
+        const params = new URLSearchParams({
+          nickName: userInfo.nickName,
+          profileImage: userInfo.profileImage,
+        });
+        router.push(`/dog/register?${params.toString()}`);
+      } else {
+        console.error("강아지 정보 조회 중 에러 발생:", dogError);
+      }
+    }
+  }, [dogError, userInfo, router]);
 
-    setUserInfo((prev) => ({ ...prev, togetherTime: calculatedTime }));
-  }, [dogInfo.togetherDate]);
-
-  useEffect(() => {
-    localStorage.setItem("userInfo", JSON.stringify(userInfo));
-  }, [userInfo]);
-
-  useEffect(() => {
-    localStorage.setItem("dogInfo", JSON.stringify(dogInfo));
-  }, [dogInfo]);
+  if (userLoading) return <div>로딩중...</div>;
 
   return (
-    <Main>
+    <div className={`${layout.flex.list.full} justify-between`}>
       <Header />
       <div className="flex flex-col justify-between h-full ">
-        <UserInfoBox userInfo={userInfo} dogInfo={dogInfo} />
-        <FlexListFull className="items-center justify-center p-4 ">
+        {userInfo && dogInfo && (
+          <UserInfoBox userInfo={userInfo} dogInfo={dogInfo} />
+        )}
+        <div
+          className={`${layout.flex.list.full} items-center justify-center p-4 `}
+        >
           <Dog />
           <TodayQuestion />
-        </FlexListFull>
+        </div>
       </div>
       <Footer />
-    </Main>
+    </div>
+  );
+}
+
+// 메인 페이지 컴포넌트
+export default function Page() {
+  const queryClient = new QueryClient();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <MainContent />
+    </QueryClientProvider>
   );
 }

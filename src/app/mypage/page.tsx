@@ -1,351 +1,267 @@
 "use client";
+import heart from "../../../public/icons/heart.png";
+import emptyDogImage from "../../../public/icons/empty-dog.svg";
+import fillUserImage from "../../../public/icons/fill-user.svg";
+import Camera from "../../../public/icons/device-camera.png";
+import { layout } from "@/styles/layout";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import { getUserInfo, getDogInfo } from "@/api/info/getInfo";
 import Image from "next/image";
-import cameraIcon from "../../../public/icons/device-camera.png";
-import saveIcon from "../../../public/icons/save-icon-white.png";
-import userIcon from "../../../public/icons/person.png";
-import dogIcon from "../../../public/icons/dogIcon.png";
-import logoutIcon from "../../../public/icons/sign-out.png";
-import trashIcon from "../../../public/icons/trash.png";
-import expandDownIcon from "../../../public/icons/Expand_down_light.png";
-import expandUpIcon from "../../../public/icons/Expand_up_light.png";
-import Main from "../components/Main";
-import FlexListFull, {
-  FlexColumnCenter,
-  FlexColumnFullWidth,
-  FlexRowCenter,
-  FlexRowFullWidth,
-} from "../components/Flex";
-import { useEffect, useState } from "react";
-import { StaticImageData } from "next/image";
+import { useForm } from "react-hook-form";
 import { UserInfo, DogInfo } from "@/types/mainInfo";
-import DecoratedInput from "../components/Input";
-import DecoratedSelect from "../components/Select";
-import DecoratedConfirm from "../components/Confirm";
-import { useRouter } from "next/navigation";
-type MenuItemType = {
-  name: string;
-  icon: StaticImageData;
-  alt: string;
-  open?: boolean;
-  onClick: () => void;
-};
+import { useEffect, useState } from "react";
+import { mypageList } from "@/lib/static/mypage";
+import { MenuItem, MenuItemWithFields } from "@/types/menu";
+import { textInput } from "@/styles/input";
+interface ProfileForm {
+  userInfo: UserInfo;
+  dogInfo: DogInfo;
+}
 
-export default function MyPage() {
-  const router = useRouter();
-  const [isEditing, setIsEditing] = useState(false);
-  const [userInfo, setUserInfo] = useState<UserInfo>({} as UserInfo);
-  const [dogInfo, setDogInfo] = useState<DogInfo>({} as DogInfo);
-
-  useEffect(() => {
-    try {
-      const savedUserInfo = JSON.parse(
-        localStorage.getItem("userInfo") || "{}"
-      );
-      const savedDogInfo = JSON.parse(localStorage.getItem("dogInfo") || "{}");
-
-      console.log("localStorage에서 불러온 데이터:", {
-        savedUserInfo,
-        savedDogInfo,
-      });
-
-      // Date 문자열을 Date 객체로 변환
-      if (savedDogInfo.birthDate) {
-        savedDogInfo.birthDate = new Date(savedDogInfo.birthDate);
-      }
-      if (savedDogInfo.togetherDate) {
-        savedDogInfo.togetherDate = new Date(savedDogInfo.togetherDate);
-      }
-
-      setUserInfo(savedUserInfo);
-      setDogInfo(savedDogInfo);
-
-      console.log("상태 업데이트 시도 후");
-    } catch (error) {
-      console.error("localStorage 데이터 로드 중 에러:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    //이메일 형식인지 검사
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(userInfo.email)) {
-      console.log("이메일 형식이 올바르지 않습니다.");
-    }
-  }, [userInfo.email]);
-  // localStorage 저장
-  useEffect(() => {
-    if (Object.keys(userInfo).length > 0 || Object.keys(dogInfo).length > 0) {
-      localStorage.setItem("userInfo", JSON.stringify(userInfo));
-      localStorage.setItem("dogInfo", JSON.stringify(dogInfo));
-    }
-  }, [userInfo, dogInfo]);
-
-  const [showConfirm, setShowConfirm] = useState<{
-    show: boolean;
-    type: "logout" | "withdraw" | null;
-  }>({
-    show: false,
-    type: null,
+function MyPageContent() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+    setValue,
+  } = useForm<ProfileForm>({
+    defaultValues: {
+      userInfo: {
+        profileImage: fillUserImage.src,
+      },
+      dogInfo: {
+        photo: emptyDogImage.src,
+      },
+    },
   });
 
-  const [editMenu, setEditMenu] = useState<MenuItemType[]>([
-    {
-      name: "보호자 정보",
-      icon: userIcon,
-      alt: "user-info",
-      open: false,
-      onClick: () => {
-        setEditMenu((prev) =>
-          prev.map((item) =>
-            item.alt === "user-info" ? { ...item, open: !item.open } : item
-          )
-        );
-      },
-    },
-    {
-      name: "반려동물 정보",
-      icon: dogIcon,
-      alt: "dog-info",
-      open: false,
-      onClick: () => {
-        setEditMenu((prev) =>
-          prev.map((item) =>
-            item.alt === "dog-info" ? { ...item, open: !item.open } : item
-          )
-        );
-      },
-    },
-    {
-      name: "로그아웃",
-      icon: logoutIcon,
-      alt: "logout",
-      onClick: () => {
-        setShowConfirm({ show: true, type: "logout" });
-      },
-    },
-    {
-      name: "회원 탈퇴",
-      icon: trashIcon,
-      alt: "withdraw",
-      onClick: () => {
-        setShowConfirm({ show: true, type: "withdraw" });
-      },
-    },
-  ]);
+  const { data: userInfo, isLoading: userLoading } = useQuery({
+    queryKey: ["userInfo"],
+    queryFn: getUserInfo,
+  });
+
+  const { data: dogInfo, isLoading: dogLoading } = useQuery({
+    queryKey: ["dogInfo"],
+    queryFn: getDogInfo,
+    select: (data) => data.dog,
+    retry: false,
+  });
+
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    userInfo: false,
+    dogInfo: false,
+  });
+
+  const toggleSection = (key: string) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const hasFields = (
+    item: MenuItem | MenuItemWithFields
+  ): item is MenuItemWithFields => {
+    return "fields" in item;
+  };
+
+  const handleMenuClick = (
+    key: string,
+    value: MenuItem | MenuItemWithFields
+  ) => {
+    if (hasFields(value)) {
+      toggleSection(key);
+    } else {
+      // 각 메뉴별 동작 처리
+      switch (key) {
+        case "qa":
+          // 문의하기 페이지로 이동
+          break;
+        case "logout":
+          // 로그아웃 처리
+          break;
+        case "deleteAccount":
+          // 회원탈퇴 처리
+          break;
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (userInfo) setValue("userInfo.profileImage", userInfo.profileImage);
+    if (dogInfo) setValue("dogInfo.photo", dogInfo.photo || emptyDogImage.src);
+  }, [userInfo, dogInfo, setValue]);
+
+  if (userLoading || dogLoading) return <div>로딩중...</div>;
+  if (!userInfo || !dogInfo) return null;
+
   return (
-    <Main>
-      <Header />
-      <FlexColumnCenter className="w-full p-8 h-fit" aria-label="profile">
-        <FlexColumnCenter className="gap-4 " aria-label="profile-info">
-          <FlexRowCenter className="relative" aria-label="profile image">
-            <Image
-              src={userInfo.profileImage || "/image/dog_illus/maru.png"}
-              alt="mypage"
-              width={120}
-              height={120}
-              className="rounded-full"
-            />
-            <button className="absolute bottom-0 right-0 flex items-center justify-center p-1 transition-all duration-200 bg-white rounded-full hover:bg-gray-50 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400">
+    <form className="flex flex-col justify-start w-full h-full overflow-hidden">
+      <div className={`${layout.flex.column.center} py-2 md:py-8`}>
+        <div className={`${layout.flex.row.center} gap-6 py-2 md:gap-8`}>
+          <div className="relative w-16 h-16 group md:w-24 md:h-24">
+            <div className="w-16 h-16 overflow-hidden rounded-full md:w-24 md:h-24">
               <Image
-                src={cameraIcon}
-                alt="camera"
-                width={20}
-                height={20}
-                className="opacity-70"
+                src={userInfo.profileImage}
+                alt="user"
+                width={96}
+                height={96}
+                className="object-cover w-full h-full"
               />
-            </button>
-          </FlexRowCenter>
-          <FlexRowCenter className="gap-1 text-lg">
-            <span>
-              <span>{dogInfo.name}</span>와 함께한지
-            </span>
-            <span className="text-lg font-bold">
-              {userInfo.togetherTime}일 째
-            </span>
-          </FlexRowCenter>
-        </FlexColumnCenter>
-      </FlexColumnCenter>
-      <FlexListFull className="items-start justify-center ">
-        <FlexListFull className="items-start justify-start gap-4 text-xl">
-          {editMenu.map((menu) => (
-            <div key={menu.name} className="w-full">
-              <div
-                className="flex items-center justify-between w-full"
-                onClick={menu.onClick}
-              >
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={menu.icon}
-                    alt={menu.alt}
-                    width={20}
-                    height={20}
-                  />
-                  <span
-                    className={`${
-                      (menu.alt === "logout" || menu.alt === "withdraw") &&
-                      "text-gray-400 font-medium"
-                    }`}
-                  >
-                    {menu.name}
-                  </span>
-                </div>
-                {(menu.alt === "user-info" || menu.alt === "dog-info") && (
-                  <button>
-                    <Image
-                      src={menu.open ? expandUpIcon : expandDownIcon}
-                      alt="under-arrow"
-                      width={24}
-                      height={24}
-                      className="object-contain"
-                    />
-                  </button>
-                )}
+              <div className="absolute bottom-0 right-0 p-1 bg-white rounded-full">
+                <Image src={Camera} alt="camera" width={20} height={20} />
               </div>
-              {menu.open && (
-                <FlexColumnFullWidth>
-                  {menu.alt === "user-info" ? (
-                    <>
-                      <FlexRowFullWidth className="justify-between p-2 text-base">
-                        <span>닉네임</span>
-                        <DecoratedInput
-                          type="text"
-                          value={userInfo.name}
-                          onChange={(e) => {
-                            setUserInfo({ ...userInfo, name: e.target.value });
-                            setIsEditing(true);
-                          }}
-                          label="닉네임"
-                        />
-                      </FlexRowFullWidth>
-                      <FlexRowFullWidth className="justify-between p-2 text-base">
-                        <span>이메일</span>
-                        <DecoratedInput
-                          type="text"
-                          value={userInfo.email}
-                          onChange={(e) => {
-                            setUserInfo({ ...userInfo, email: e.target.value });
-                            setIsEditing(true);
-                          }}
-                          label="이메일"
-                        />
-                      </FlexRowFullWidth>
-                    </>
-                  ) : (
-                    <>
-                      <FlexRowFullWidth className="justify-between p-2 text-base">
-                        <span>반려동물 이름</span>
-                        <DecoratedInput
-                          type="text"
-                          value={dogInfo.name}
-                          onChange={(e) => {
-                            setDogInfo({ ...dogInfo, name: e.target.value });
-                            setIsEditing(true);
-                          }}
-                          label="반려동물 이름"
-                        />
-                      </FlexRowFullWidth>
-                      <FlexRowFullWidth className="justify-between p-2 text-base">
-                        <span>성별</span>
-                        <DecoratedSelect
-                          options={["남자", "여자"]}
-                          value={dogInfo.gender}
-                          onChange={(e) => {
-                            setDogInfo({ ...dogInfo, gender: e.target.value });
-                            setIsEditing(true);
-                          }}
-                          label="성별"
-                        ></DecoratedSelect>
-                      </FlexRowFullWidth>
-                      <FlexRowFullWidth className="justify-between p-2 text-base">
-                        <span>생년월일</span>
-                        <DecoratedInput
-                          type="date"
-                          value={
-                            dogInfo.birthDate instanceof Date
-                              ? dogInfo.birthDate.toISOString().split("T")[0]
-                              : new Date().toISOString().split("T")[0]
-                          }
-                          onChange={(e) => {
-                            try {
-                              setDogInfo({
-                                ...dogInfo,
-                                birthDate: new Date(e.target.value),
-                              });
-                              setIsEditing(true);
-                            } catch (error) {
-                              alert("날짜 형식이 올바르지 않습니다.");
-                              console.error("날짜 형식 오류:", error);
-                            }
-                          }}
-                          label="생년월일"
-                        />
-                      </FlexRowFullWidth>
-                      <FlexRowFullWidth className="justify-between p-2 text-base">
-                        <span>처음 만난 날</span>
-                        <DecoratedInput
-                          type="date"
-                          value={
-                            dogInfo.togetherDate.toISOString().split("T")[0]
-                          }
-                          onChange={(e) => {
-                            try {
-                              setDogInfo({
-                                ...dogInfo,
-                                togetherDate: new Date(e.target.value),
-                              });
-                            } catch (error) {
-                              alert("날짜 형식이 올바르지 않습니다.");
-                              console.error("날짜 형식 오류:", error);
-                            }
-                          }}
-                          label="처음 만난 날"
-                        />
-                      </FlexRowFullWidth>
-                    </>
-                  )}
-                </FlexColumnFullWidth>
-              )}
             </div>
-          ))}
-          {isEditing && (
-            <button className="flex items-center gap-2 px-2 py-1 ml-auto text-white rounded-md w-fit bg-main-yellow">
-              <Image src={saveIcon} alt="save" width={20} height={20} />
-              저장
+            <label
+              htmlFor="userPhoto"
+              className="absolute inset-0 flex items-center justify-center invisible transition-all bg-black rounded-full opacity-0 cursor-pointer bg-opacity-40 group-hover:visible group-hover:opacity-100"
+            >
+              <span className="text-sm text-white">사진 변경</span>
+            </label>
+            <input
+              type="file"
+              id="userPhoto"
+              accept="image/*"
+              className="hidden"
+              {...register("userInfo.profileImage")}
+            />
+          </div>
+          <Image src={heart} alt="heart" width={20} height={20} />
+          <div className="relative w-16 h-16 group md:w-24 md:h-24">
+            <div className="w-16 h-16 overflow-hidden rounded-full md:w-24 md:h-24">
+              <Image
+                src={dogInfo.photo || emptyDogImage.src}
+                alt="dog"
+                width={96}
+                height={96}
+                className="object-cover w-full h-full"
+              />
+              <div className="absolute bottom-0 right-0 p-1 bg-white rounded-full">
+                <Image src={Camera} alt="camera" width={20} height={20} />
+              </div>
+            </div>
+            <label
+              htmlFor="dogPhoto"
+              className="absolute inset-0 flex items-center justify-center invisible transition-all bg-black rounded-full opacity-0 cursor-pointer bg-opacity-40 group-hover:visible group-hover:opacity-100"
+            >
+              <span className="text-sm text-white">사진 변경</span>
+            </label>
+            <input
+              type="file"
+              id="dogPhoto"
+              accept="image/*"
+              className="hidden"
+              {...register("dogInfo.photo")}
+            />
+          </div>
+        </div>
+        <span className="text-lg font-medium">
+          <span className="text-lg font-bold">{dogInfo.name}</span>과 함께한지{" "}
+          <span className="text-lg font-bold">{dogInfo.togetherFor}일째</span>
+        </span>
+      </div>
+      <div className="w-full px-4 overflow-y-auto">
+        {Object.entries(mypageList).map(([key, value]) => (
+          <div key={key}>
+            <button
+              type="button"
+              onClick={() => handleMenuClick(key, value)}
+              className="flex items-center justify-between w-full py-2"
+            >
+              <div className="flex items-center gap-3">
+                <Image src={value.icon} alt={key} width={24} height={24} />
+                <span className="text-lg font-medium">{value.label}</span>
+              </div>
+              {hasFields(value) && (
+                <svg
+                  className={`w-5 h-5 transition-transform duration-300 ease-in-out ${
+                    openSections[key] ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              )}
             </button>
-          )}
-        </FlexListFull>
-      </FlexListFull>
-      <Footer />
-      {showConfirm.show && (
-        <DecoratedConfirm
-          className=" animate-[fadeIn_0.2s_ease-in-out]"
-          title={showConfirm.type === "logout" ? "로그아웃" : "회원 탈퇴"}
-          message={
-            showConfirm.type === "logout"
-              ? "정말 로그아웃 하시겠습니까?"
-              : "탈퇴하면 정보가 모두 사라집니다.\n정말 탈퇴하시겠습니까?"
-          }
-          onConfirm={() => {
-            if (showConfirm.type === "logout") {
-              localStorage.removeItem("userInfo");
-              localStorage.removeItem("dogInfo");
-              router.push("/login");
-              // 로그아웃 로직
-            } else {
-              localStorage.removeItem("userInfo");
-              localStorage.removeItem("dogInfo");
-              router.push("/login");
-              // 회원탈퇴 로직
-            }
-            setShowConfirm({ show: false, type: null });
-          }}
-          onCancel={() => {
-            setShowConfirm({ show: false, type: null });
-          }}
-        />
-      )}
-    </Main>
+
+            {hasFields(value) && openSections[key] && (
+              <div className="pb-4 space-y-3 pl-11">
+                {value.fields.map((field, index) => (
+                  <div
+                    key={index}
+                    className={`${layout.flex.row.between} items-center w-full`}
+                  >
+                    <span className="text-sm text-gray-500">{field.label}</span>
+                    {key === "userInfo" && field.label === "이메일" && (
+                      <input
+                        {...register("userInfo.email")}
+                        defaultValue={userInfo.email}
+                        className={`${textInput.subInput} w-60`}
+                      />
+                    )}
+                    {key === "userInfo" && field.label === "닉네임" && (
+                      <input
+                        {...register("userInfo.nickName")}
+                        defaultValue={userInfo.nickName}
+                        className={`${textInput.subInput}`}
+                      />
+                    )}
+                    {key === "dogInfo" && field.label === "이름" && (
+                      <input
+                        {...register("dogInfo.name")}
+                        defaultValue={dogInfo.name}
+                        className={`${textInput.subInput}`}
+                      />
+                    )}
+                    {key === "dogInfo" && field.label === "생년월일" && (
+                      <input
+                        type="date"
+                        {...register("dogInfo.birthday")}
+                        defaultValue={dogInfo.birthday}
+                        className={`${textInput.subInput}`}
+                      />
+                    )}
+                    {key === "dogInfo" && field.label === "첫 만남 날짜" && (
+                      <input
+                        type="date"
+                        {...register("dogInfo.firstMetAt")}
+                        defaultValue={dogInfo.firstMetAt}
+                        className={`${textInput.subInput}`}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </form>
+  );
+}
+export default function MyPage() {
+  const queryClient = new QueryClient();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <div className={`${layout.flex.list.full} justify-between`}>
+        <Header />
+        <MyPageContent />
+        <Footer />
+      </div>
+    </QueryClientProvider>
   );
 }
