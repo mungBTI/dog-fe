@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { kakaoAuth } from "@/api/auth/kakaoAuth";
+import LoginPageLoading from "@/app/components/LoginPageLoding";
 
 const KakaoCallback = () => {
   const router = useRouter();
@@ -11,6 +12,7 @@ const KakaoCallback = () => {
     const handleKakaoLogin = async () => {
       const url = new URL(window.location.href);
       const code = url.searchParams.get("code");
+
       if (!code) {
         alert("다시 로그인해주세요.");
         router.replace("/login");
@@ -18,6 +20,10 @@ const KakaoCallback = () => {
       }
       try {
         const res = await kakaoAuth(code);
+
+        // LoginPageLoading 컴포넌트 text가 완전히 출력될될 시간 확보
+        await new Promise((resolve) => setTimeout(resolve, 1600));
+
         const data = res.data;
         if (data.accessToken) {
           localStorage.setItem("accessToken", data.accessToken);
@@ -35,7 +41,11 @@ const KakaoCallback = () => {
     handleKakaoLogin();
   }, [router]);
 
-  return <div>로딩 개발 예정</div>;
+  return (
+    <div>
+      <LoginPageLoading />
+    </div>
+  );
 };
 
 export default KakaoCallback;
