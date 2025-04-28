@@ -3,6 +3,7 @@ import heart from "../../../public/icons/heart.png";
 import emptyDogImage from "../../../public/icons/empty-dog.svg";
 import fillUserImage from "../../../public/icons/fill-user.svg";
 import Camera from "../../../public/icons/device-camera.png";
+import DogFootIcon from "@/image/dog_foot.svg";
 import { layout } from "@/styles/layout";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -10,6 +11,7 @@ import {
   QueryClient,
   QueryClientProvider,
   useQuery,
+  useMutation,
 } from "@tanstack/react-query";
 import { getUserInfo, getDogInfo } from "@/api/info/getInfo";
 import Image from "next/image";
@@ -19,6 +21,9 @@ import { useEffect, useState } from "react";
 import { mypageList } from "@/lib/static/mypage";
 import { MenuItem, MenuItemWithFields } from "@/types/menu";
 import { textInput } from "@/styles/input";
+import { editUserInfo, editDogInfo } from "@/api/info/postInfo";
+import GeneralLoading from "../components/GeneralLoading";
+
 interface ProfileForm {
   userInfo: UserInfo;
   dogInfo: DogInfo;
@@ -28,8 +33,7 @@ function MyPageContent() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-    watch,
+    formState: { isSubmitting },
     setValue,
   } = useForm<ProfileForm>({
     defaultValues: {
@@ -45,6 +49,7 @@ function MyPageContent() {
   const { data: userInfo, isLoading: userLoading } = useQuery({
     queryKey: ["userInfo"],
     queryFn: getUserInfo,
+    select: (data) => data.user,
   });
 
   const { data: dogInfo, isLoading: dogLoading } = useQuery({
@@ -94,16 +99,62 @@ function MyPageContent() {
     }
   };
 
+  const queryClient = new QueryClient();
+
+  const { mutate: editUser } = useMutation({
+    mutationFn: editUserInfo,
+    onSuccess: () => {
+      // 유저 정보 업데이트 성공
+      queryClient.invalidateQueries({ queryKey: ["userInfo"] });
+    },
+  });
+
+  const { mutate: editDog } = useMutation({
+    mutationFn: editDogInfo,
+    onSuccess: () => {
+      // 강아지 정보 업데이트 성공
+      queryClient.invalidateQueries({ queryKey: ["dogInfo"] });
+    },
+  });
+
+  const onSubmit = async (data: ProfileForm) => {
+    try {
+      // 유저 정보 업데이트
+      await editUser({
+        nickName: data.userInfo.nickName,
+        profileImage: data.userInfo.profileImage,
+      });
+
+      // 강아지 정보 업데이트
+      await editDog({
+        name: data.dogInfo.name,
+        birthday: new Date(data.dogInfo.birthday),
+        firstMetAt: new Date(data.dogInfo.firstMetAt),
+        photo: data.dogInfo.photo,
+      });
+
+      // 성공 메시지 표시
+      alert("저장되었습니다!");
+    } catch (error) {
+      // 에러 처리
+      console.error("Error updating info:", error);
+      alert("저장 중 오류가 발생했습니다.");
+    }
+  };
+
   useEffect(() => {
     if (userInfo) setValue("userInfo.profileImage", userInfo.profileImage);
     if (dogInfo) setValue("dogInfo.photo", dogInfo.photo || emptyDogImage.src);
   }, [userInfo, dogInfo, setValue]);
 
-  if (userLoading || dogLoading) return <div>로딩중...</div>;
+  if (userLoading || dogLoading) return <GeneralLoading />;
   if (!userInfo || !dogInfo) return null;
 
   return (
-    <form className="flex flex-col justify-start w-full h-full overflow-hidden">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col justify-start w-full h-full overflow-hidden"
+    >
       <div className={`${layout.flex.column.center} py-2 md:py-8`}>
         <div className={`${layout.flex.row.center} gap-6 py-2 md:gap-8`}>
           <div className="relative w-16 h-16 group md:w-24 md:h-24">
@@ -115,7 +166,7 @@ function MyPageContent() {
                 height={96}
                 className="object-cover w-full h-full"
               />
-              <div className="absolute bottom-0 right-0 p-1 bg-white rounded-full">
+              <div className="absolute bottom-0 right-0 z-30 p-1 bg-white rounded-full">
                 <Image src={Camera} alt="camera" width={20} height={20} />
               </div>
             </div>
@@ -143,7 +194,7 @@ function MyPageContent() {
                 height={96}
                 className="object-cover w-full h-full"
               />
-              <div className="absolute bottom-0 right-0 p-1 bg-white rounded-full">
+              <div className="absolute bottom-0 right-0 z-30 p-1 bg-white rounded-full">
                 <Image src={Camera} alt="camera" width={20} height={20} />
               </div>
             </div>
@@ -250,6 +301,16 @@ function MyPageContent() {
           </div>
         ))}
       </div>
+      <button
+        type="submit"
+        className="relative mx-auto transition-transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 w-fit"
+        disabled={isSubmitting}
+      >
+        <DogFootIcon className="text-black transition-colors duration-300 w-14 h-14 group-hover:text-main-yellow" />
+        <span className="absolute font-medium text-white -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+          {isSubmitting ? "저장 중..." : "저장"}
+        </span>
+      </button>
     </form>
   );
 }

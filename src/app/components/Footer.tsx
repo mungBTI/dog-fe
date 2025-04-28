@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import dogFootImage from "../../../public/icons/dog_foot.png";
+import DogFootIcon from "@/image/dog_foot.svg";
 import calendarImage from "../../../public/icons/calendar.png";
 import userImage from "../../../public/icons/person.png";
 import { useRouter } from "next/navigation";
@@ -9,13 +9,13 @@ import { useRouter } from "next/navigation";
 const footerArry = [
   {
     label: "홈화면",
-    iconsrc: dogFootImage,
+    iconsrc: DogFootIcon,
     path: "/main",
   },
   {
     label: "과거 일기",
     iconsrc: calendarImage,
-    path: "/diary",
+    path: "/answer",
   },
   {
     label: "마이페이지",

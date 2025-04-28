@@ -14,20 +14,27 @@ import axios from "axios";
 import UserInfoBox from "./_components/UserInfo";
 import { layout } from "@/styles/layout";
 import { useEffect } from "react";
+import GeneralLoading from "../components/GeneralLoading";
 
 // 실제 컨텐츠를 보여줄 컴포넌트 분리
 function MainContent() {
   const router = useRouter();
 
-  const { data: userInfo, isLoading: userLoading } = useQuery({
+  const {
+    data: userInfo,
+    isLoading: userLoading,
+    error: userError,
+  } = useQuery({
     queryKey: ["userSimpleInfo"],
     queryFn: getUserSimpleInfo,
+    select: (data) => data.user,
   });
 
   const { data: dogInfo, error: dogError } = useQuery({
     queryKey: ["dogSimpleInfo"],
     queryFn: getDogSimpleInfo,
     retry: false,
+    select: (data) => data.dog,
   });
 
   useEffect(() => {
@@ -35,7 +42,7 @@ function MainContent() {
       if (
         axios.isAxiosError(dogError) &&
         dogError.response?.status === 404 &&
-        dogError.response?.data?.message === "등록된 강아지가 없습니다."
+        dogError.response?.data?.error_code === 1007
       ) {
         const params = new URLSearchParams({
           nickName: userInfo.nickName,
@@ -46,9 +53,18 @@ function MainContent() {
         console.error("강아지 정보 조회 중 에러 발생:", dogError);
       }
     }
-  }, [dogError, userInfo, router]);
+    if (userError) {
+      if (
+        axios.isAxiosError(userError) &&
+        userError.response?.status === 404 &&
+        userError.response?.data?.error_code === 5003
+      ) {
+        router.push("/login");
+      }
+    }
+  }, [dogError, userInfo, router, userError]);
 
-  if (userLoading) return <div>로딩중...</div>;
+  if (userLoading) return <GeneralLoading />;
 
   return (
     <div className={`${layout.flex.list.full} justify-between`}>

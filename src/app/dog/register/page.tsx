@@ -3,7 +3,7 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { textInput } from "@/styles/input";
-import dogFootImage from "../../../../public/icons/dog_foot.png";
+import DogFootIcon from "@/image/dog_foot.svg";
 import fillUserImage from "../../../../public/icons/fill-user.svg";
 import emptyDogImage from "../../../../public/icons/empty-dog.svg";
 import { postDogInfo } from "@/api/info/postInfo";
@@ -168,21 +168,8 @@ export default function Page() {
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="relative mx-auto transition-transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 w-fit"
-        >
-          <Image
-            src={dogFootImage}
-            alt="register"
-            width={100}
-            height={100}
-            className="object-contain w-20 h-20"
-          />
-          <span className="absolute font-medium text-white -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-            {isSubmitting ? "등록 중..." : "등록"}
-          </span>
+        <button type="submit" disabled={isSubmitting}>
+          <DogFootIcon className="text-black w-14 h-14 hover:text-main-yellow" />
         </button>
       </form>
     </div>
