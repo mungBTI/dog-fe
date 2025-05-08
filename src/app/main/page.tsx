@@ -4,19 +4,15 @@ import Header from "../components/Header";
 import Dog from "./_components/Dog";
 import TodayQuestion from "./_components/TodayQuestion";
 import { getDogSimpleInfo, getUserSimpleInfo } from "@/api/info/getInfo";
+import { getAnswerToday } from "@/api/question/question";
 import { useRouter } from "next/navigation";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import UserInfoBox from "./_components/UserInfo";
 import { layout } from "@/styles/layout";
 import { useEffect } from "react";
 import GeneralLoading from "../components/GeneralLoading";
 
-// 실제 컨텐츠를 보여줄 컴포넌트 분리
 function MainContent() {
   const router = useRouter();
 
@@ -86,11 +82,5 @@ function MainContent() {
 
 // 메인 페이지 컴포넌트
 export default function Page() {
-  const queryClient = new QueryClient();
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <MainContent />
-    </QueryClientProvider>
-  );
+  return <MainContent />;
 }

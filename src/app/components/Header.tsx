@@ -10,8 +10,8 @@ export default function Header() {
         <Image
           src={dudungMungImage}
           alt="logo"
-          height={30}
-          className="object-contain size-fit"
+          width={200}
+          className="object-contain"
         />
       </div>
     </div>

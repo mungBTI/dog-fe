@@ -7,12 +7,7 @@ import DogFootIcon from "@/image/dog_foot.svg";
 import { layout } from "@/styles/layout";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-  useMutation,
-} from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { getUserInfo, getDogInfo } from "@/api/info/getInfo";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -98,8 +93,6 @@ function MyPageContent() {
       }
     }
   };
-
-  const queryClient = new QueryClient();
 
   const { mutate: editUser } = useMutation({
     mutationFn: editUserInfo,
@@ -315,14 +308,11 @@ function MyPageContent() {
   );
 }
 export default function MyPage() {
-  const queryClient = new QueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className={`${layout.flex.list.full} justify-between`}>
-        <Header />
-        <MyPageContent />
-        <Footer />
-      </div>
-    </QueryClientProvider>
+    <div className={`${layout.flex.list.full} justify-between`}>
+      <Header />
+      <MyPageContent />
+      <Footer />
+    </div>
   );
 }
