@@ -26,3 +26,11 @@ export type SimpleDogInfo = {
   photo: string;
   togetherFor: number;
 };
+export type Answer = {
+  status: number;
+  message: string;
+  answers: Array<{
+    id: string;
+    date: number;
+  }>;
+};

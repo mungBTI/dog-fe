@@ -38,29 +38,28 @@ function MainContent() {
   });
 
   useEffect(() => {
-    if (dogError && userInfo) {
-      if (
-        axios.isAxiosError(dogError) &&
-        dogError.response?.status === 404 &&
-        dogError.response?.data?.error_code === 1007
-      ) {
-        const params = new URLSearchParams({
-          nickName: userInfo.nickName,
-          profileImage: userInfo.profileImage,
-        });
-        router.push(`/dog/register?${params.toString()}`);
-      } else {
-        console.error("강아지 정보 조회 중 에러 발생:", dogError);
-      }
+    if (
+      (axios.isAxiosError(userError) && userError.response?.status === 401) ||
+      (axios.isAxiosError(dogError) && dogError.response?.status === 401)
+    ) {
+      return router.push("/login");
     }
-    if (userError) {
-      if (
-        axios.isAxiosError(userError) &&
-        userError.response?.status === 404 &&
-        userError.response?.data?.error_code === 5003
-      ) {
-        router.push("/login");
-      }
+
+    if (
+      userInfo &&
+      axios.isAxiosError(dogError) &&
+      dogError.response?.status === 404 &&
+      dogError.response?.data?.error_code === 1006
+    ) {
+      const params = new URLSearchParams({
+        nickName: userInfo.nickName,
+        profileImage: userInfo.profileImage,
+      });
+      return router.push(`/dog/register?${params.toString()}`);
+    }
+
+    if (dogError) {
+      console.error("강아지 정보 조회 중 에러 발생:", dogError, userInfo);
     }
   }, [dogError, userInfo, router, userError]);
 

@@ -3,7 +3,7 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { textInput } from "@/styles/input";
-import DogFootIcon from "@/image/dog_foot.svg";
+import dogFootIcon from "@/image/dog_foot.svg";
 import fillUserImage from "../../../../public/icons/fill-user.svg";
 import emptyDogImage from "../../../../public/icons/empty-dog.svg";
 import { postDogInfo } from "@/api/info/postInfo";
@@ -46,17 +46,14 @@ export default function Page() {
       await postDogInfo(postData).then(() => {
         router.push("/main");
       });
-
-      // 성공 처리 (예: 리다이렉트)
     } catch (error) {
       console.error("Error:", error);
-      // 에러 처리
     }
   };
 
   return (
     <div className="flex flex-col justify-center h-full gap-4">
-      <div className="flex flex-row items-center gap-2">
+      <div className="flex flex-row items-center justify-center gap-2">
         <div className="overflow-hidden rounded-full w-9 h-9">
           <Image
             src={userPhoto || fillUserImage}
@@ -70,7 +67,7 @@ export default function Page() {
       </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col w-full gap-4"
+        className="flex flex-col w-full gap-4 px-12 py-4"
       >
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-24 h-24 group">
@@ -168,8 +165,22 @@ export default function Page() {
           )}
         </div>
 
-        <button type="submit" disabled={isSubmitting}>
-          <DogFootIcon className="text-black w-14 h-14 hover:text-main-yellow" />
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="relative flex items-center justify-center"
+        >
+          <Image
+            src={dogFootIcon}
+            alt="dog foot"
+            width={56}
+            height={56}
+            className="text-black w-14 h-14 hover:text-main-yellow"
+            aria-label="register dog"
+          />
+          <span className="absolute pt-4 text-sm text-white pointer-events-none">
+            등록
+          </span>
         </button>
       </form>
     </div>
