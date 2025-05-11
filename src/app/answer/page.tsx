@@ -4,22 +4,96 @@ import { CalendarDay, DayPicker, Modifiers } from "react-day-picker";
 import { layout } from "@/styles/layout";
 import { ko } from "date-fns/locale";
 import Header from "../components/Header";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Footer from "../components/Footer";
+import { useQuery } from "@tanstack/react-query";
+import { getMonthAnswer, getQuestion } from "@/api/answer/getAnswer";
+import {
+  AnswerResponse,
+  Answers,
+  Question,
+  QuestionResponse,
+} from "@/types/calendar";
+import GeneralLoading from "../components/GeneralLoading";
 
 export default function Answer() {
-  const [selected, setSelected] = useState<Date>();
-  const answeredDays = [
-    new Date("2025-04-08"),
-    new Date("2025-04-09"),
-    new Date("2025-04-11"),
-  ];
+  const today = new Date();
+
+  const [month, setMonth] = useState(today);
+  const [selected, setSelected] = useState<Date | undefined>(new Date());
+  const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
+
+  const {
+    data: listData,
+    isError: listIsError,
+    error: listError,
+    isLoading: listIsLoading,
+  } = useQuery<AnswerResponse, unknown, Answers[]>({
+    queryKey: [
+      "answer",
+      { year: month.getFullYear(), month: month.getMonth() + 1 },
+    ],
+    queryFn: () => getMonthAnswer(month.getFullYear(), month.getMonth() + 1),
+    select: (data) => data.answers,
+  });
+
+  if (listIsError) {
+    console.error(`오류: ${(listError as Error).message}`);
+  }
+
+  const answeredDates = useMemo(() => {
+    return (
+      (listData
+        ?.map(
+          ({ date }) => new Date(month.getFullYear(), month.getMonth(), date)
+        )
+        .filter(Boolean) as Date[]) || []
+    );
+  }, [listData, month]);
+
+  useEffect(() => {
+    if (selected && listData) {
+      const selectedDayAnswer = listData.find(
+        ({ date }) => date === selected.getDate()
+      );
+      setSelectedAnswerId(selectedDayAnswer?.id || null);
+    } else {
+      setSelectedAnswerId(null);
+    }
+  }, [selected, listData]);
+
+  const {
+    data: questionData,
+    isError: questionIsError,
+    error: questionError,
+    isLoading: questionIsLoading,
+  } = useQuery<QuestionResponse, unknown, Question>({
+    queryKey: ["question", selectedAnswerId],
+    queryFn: () => {
+      if (!selectedAnswerId) return Promise.reject("ID가 없습니다");
+      return getQuestion(selectedAnswerId);
+    },
+    select: (data) => data.answer,
+    enabled: !!selectedAnswerId,
+  });
+
+  if (questionIsError) {
+    console.error(`오류: ${(questionError as Error).message}`);
+  }
+
+  if (listIsLoading || questionIsLoading) {
+    return (
+      <div className={`${layout.flex.list.full} item-center justify-center`}>
+        <GeneralLoading />
+      </div>
+    );
+  }
 
   return (
     <div className={`${layout.flex.list.full} justify-between`}>
       <Header />
       <div
-        className={`${layout.flex.column.fullWidth} w-[300px] md:w-[400px] items-center justify-start my-4 gap-5`}
+        className={`${layout.flex.column.fullWidth} items-center justify-center my-4 gap-5`}
       >
         <DayPicker
           hideNavigation
@@ -28,10 +102,12 @@ export default function Answer() {
           selected={selected}
           onSelect={setSelected}
           locale={ko}
+          month={month}
+          onMonthChange={setMonth}
           formatters={{
             formatYearDropdown: (year) => `${year.getFullYear()}년`,
           }}
-          modifiers={{ answered: answeredDays }}
+          modifiers={{ answered: answeredDates }}
           components={{
             DayButton: (
               props: {
@@ -40,16 +116,31 @@ export default function Answer() {
               } & React.HTMLAttributes<HTMLButtonElement>
             ) => {
               const { day, modifiers, className, ...rest } = props;
-              const todayClass = modifiers.today
-                ? `border-2 border-main-yellow`
-                : "";
+
+              const isToday = modifiers.today;
+              const isSelected = modifiers.selected;
+
+              let todayClass = "";
+
+              if (isToday && !isSelected) {
+                todayClass = "font-bold text-red-500";
+              }
 
               return (
                 <button
-                  className={`${className} ${todayClass} w-full h-full text-center flex flex-col items-center justify-start p-2`}
+                  className={`${className} ${todayClass} w-full min-h-[50px] flex flex-col items-center justify-start p-2`}
                   {...rest}
                 >
-                  <div>{day.date.getDate()}</div>
+                  <div
+                    className={
+                      isSelected
+                        ? "w-5 h-5 rounded-full bg-main-yellow text-white flex items-center justify-center"
+                        : "w-5 h-5 flex items-center justify-center"
+                    }
+                  >
+                    {day.date.getDate()}
+                  </div>
+
                   {modifiers.answered && (
                     <div className="w-1.5 h-1.5 bg-main-yellow rounded-full mt-1" />
                   )}
@@ -58,22 +149,36 @@ export default function Answer() {
             },
           }}
           classNames={{
-            selected: `bg-main-yellow text-white`,
             root: ` w-[300px] md:w-[400px] h-[400px] shadow-lg p-6 bg-white rounded-lg`,
-            day: `text-center md:w-[50px] md:h-[50px]`,
             caption_label: `hidden`,
             dropdowns: `flex flex-row-reverse gap-2 h-8 font-semibold`,
             years_dropdown: `text-center`,
             months_dropdown: `text-center`,
+            month_grid: `w-full grid-cols-7`,
+            month_caption: `flex items-center justify-start`,
           }}
         />
+        <div>
+          <div className="flex justify-end w-[300px] md:w-[400px] text-main-yellow font-semibold">
+            <button
+              onClick={() => {
+                setMonth(today);
+                setSelected(today);
+              }}
+            >
+              오늘로 돌아가기
+            </button>
+          </div>
+        </div>
         <div className="w-[300px] md:w-[400px] h-5 text-left mt-4 text-lg font-semibold">
           {selected?.toLocaleDateString()}
         </div>
         <div className="w-[300px] md:w-[400px] h-12 text-left m-4 text-lg font-semibold">
-          {answeredDays.some(
-            (day) => selected?.toDateString() === day.toDateString()
-          ) && <p>질문이 들어갈 자리입니다.</p>}
+          <p>
+            {questionData?.questionText
+              ? questionData?.questionText
+              : "기록하지 않은 날입니다."}
+          </p>
         </div>
       </div>
       <Footer />
