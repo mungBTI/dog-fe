@@ -7,7 +7,7 @@ import Header from "../components/Header";
 import { useEffect, useMemo, useState } from "react";
 import Footer from "../components/Footer";
 import { useQuery } from "@tanstack/react-query";
-import { getMonthAnswer, getQuestion } from "@/api/answer/getAnswer";
+import { getMonthAnswer, getQuestion } from "@/api/calendar/getAnswer";
 import {
   AnswerResponse,
   Answers,
@@ -16,7 +16,7 @@ import {
 } from "@/types/calendar";
 import GeneralLoading from "../components/GeneralLoading";
 
-export default function Answer() {
+export default function Calendar() {
   const today = new Date();
 
   const [month, setMonth] = useState(today);
