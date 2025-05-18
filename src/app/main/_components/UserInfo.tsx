@@ -10,30 +10,35 @@ export default function UserInfoBox({
   userInfo: SimpleUserInfo;
   dogInfo: SimpleDogInfo;
 }) {
-  if (!dogInfo.photo) {
-    dogInfo.photo = emptyDogImage.src;
+  if (!dogInfo.profilePhotoUrl) {
+    dogInfo.profilePhotoUrl = emptyDogImage.src;
   }
   return (
     <div
       className={`${layout.flex.list.full} items-end  gap-2 px-4 py-4 md:py-12 md:px-0`}
     >
       <div className="flex flex-row items-center gap-3">
-        <Image
-          src={userInfo.profilePhotoUrl}
-          alt="user"
-          width={30}
-          height={30}
-          className="rounded-full"
-        />
+        <div className="w-[30px] h-[30px] rounded-full overflow-hidden">
+          <Image
+            src={userInfo.profilePhotoUrl}
+            alt="user"
+            width={30}
+            height={30}
+            className="object-cover w-full h-full"
+          />
+        </div>
+
         <span className="text-lg font-bold">{userInfo.nickName}</span>
         <Image src={heart} alt="heart" width={20} height={20} />
-        <Image
-          src={dogInfo.photo}
-          alt="dog"
-          width={30}
-          height={30}
-          className="rounded-full"
-        />
+        <div className="w-[30px] h-[30px] rounded-full overflow-hidden">
+          <Image
+            src={dogInfo.profilePhotoUrl}
+            alt="dog"
+            width={30}
+            height={30}
+            className="object-cover w-full h-full"
+          />
+        </div>
         <span className="text-lg font-bold">{dogInfo.name}</span>
       </div>
       <div className="flex flex-row items-center gap-3">

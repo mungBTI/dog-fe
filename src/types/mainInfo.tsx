@@ -32,7 +32,7 @@ export type PostDogInfo = {
 };
 export type SimpleDogInfo = {
   name: string;
-  photo: string;
+  profilePhotoUrl: string;
   togetherFor: number;
 };
 export type Answer = {
