@@ -9,12 +9,13 @@ import emptyDogImage from "../../../../public/icons/empty-dog.svg";
 import { postDogInfo } from "@/api/info/postInfo";
 import { DogInfo, PostDogInfo } from "@/types/mainInfo";
 import { useRouter } from "next/navigation";
+import { hostingImage } from "@/api/common/common";
 
 export default function Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userName = searchParams.get("nickName");
-  const userPhoto = searchParams.get("profileImage");
+  const userPhoto = searchParams.get("profilePhotoUrl");
 
   const {
     register,
@@ -27,26 +28,38 @@ export default function Page() {
       birthday: new Date(new Date().setMonth(new Date().getMonth() - 3, 1))
         .toISOString()
         .split("T")[0],
-      photo: emptyDogImage.src,
+      profilePhotoUrl: emptyDogImage.src,
     },
     mode: "onChange",
   });
 
   const birthday = watch("birthday");
+  const photo = watch("profilePhotoUrl") as File | string;
+  const previewUrl =
+    photo instanceof File ? URL.createObjectURL(photo) : photo || emptyDogImage;
 
   const onSubmit = async (data: DogInfo) => {
     try {
+      const formData = new FormData();
+      formData.append("file", data.profilePhotoUrl);
+
+      const hostedImage = await hostingImage(formData);
+      if (!hostedImage || !hostedImage.profilePhotoId) {
+        alert("사진 업로드에 실패했습니다.");
+        return;
+      }
+
       const postData: PostDogInfo = {
         ...data,
         birthday: new Date(data.birthday),
         firstMetAt: new Date(data.firstMetAt),
-        photo: "",
+        profilePhotoId: hostedImage.profilePhotoId,
       };
 
-      await postDogInfo(postData).then(() => {
-        router.push("/main");
-      });
+      await postDogInfo(postData);
+      router.push("/main");
     } catch (error) {
+      alert("등록에 실패했습니다. 다시 시도해주세요.");
       console.error("Error:", error);
     }
   };
@@ -73,7 +86,7 @@ export default function Page() {
           <div className="relative w-24 h-24 group">
             <div className="w-24 h-24 overflow-hidden rounded-full">
               <Image
-                src={watch("photo") || emptyDogImage}
+                src={previewUrl || emptyDogImage}
                 alt="dog profile"
                 width={100}
                 height={100}
@@ -87,19 +100,14 @@ export default function Page() {
               <span className="text-sm text-white">사진 변경</span>
             </label>
             <input
-              {...register("photo")}
+              {...register("profilePhotoUrl")}
               type="file"
               id="photo"
               accept="image/*"
               className="hidden"
               onChange={(e) => {
                 if (e.target.files?.[0]) {
-                  const file = e.target.files[0];
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setValue("photo", reader.result as string);
-                  };
-                  reader.readAsDataURL(file);
+                  setValue("profilePhotoUrl", e.target.files[0]);
                 }
               }}
             />
@@ -168,7 +176,7 @@ export default function Page() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="relative flex items-center justify-center"
+          className="relative flex items-center justify-center m-auto w-fit"
         >
           <Image
             src={dogFootIcon}

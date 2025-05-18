@@ -2,22 +2,22 @@
 import heart from "../../../public/icons/heart.png";
 import emptyDogImage from "../../../public/icons/empty-dog.svg";
 import fillUserImage from "../../../public/icons/fill-user.svg";
-import Camera from "../../../public/icons/device-camera.png";
-import DogFootIcon from "@/image/dog_foot.svg";
+import dogFootIcon from "@/image/dog_foot.svg";
 import { layout } from "@/styles/layout";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserInfo, getDogInfo } from "@/api/info/getInfo";
 import Image from "next/image";
-import { useForm } from "react-hook-form";
 import { UserInfo, DogInfo } from "@/types/mainInfo";
-import { useEffect, useState } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { mypageList } from "@/lib/static/mypage";
 import { MenuItem, MenuItemWithFields } from "@/types/menu";
 import { textInput } from "@/styles/input";
 import { editUserInfo, editDogInfo } from "@/api/info/postInfo";
 import GeneralLoading from "../components/GeneralLoading";
+import { hostingImage } from "@/api/common/common";
+import { useForm } from "react-hook-form";
 
 interface ProfileForm {
   userInfo: UserInfo;
@@ -25,34 +25,98 @@ interface ProfileForm {
 }
 
 function MyPageContent() {
+  const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
     setValue,
-  } = useForm<ProfileForm>({
-    defaultValues: {
-      userInfo: {
-        profileImage: fillUserImage.src,
-      },
-      dogInfo: {
-        photo: emptyDogImage.src,
-      },
-    },
-  });
+    reset,
+    formState: { isSubmitting },
+    watch,
+  } = useForm<ProfileForm>({});
 
-  const { data: userInfo, isLoading: userLoading } = useQuery({
+  const {
+    data: userInfo,
+    isLoading: userLoading,
+    isError: userError,
+  } = useQuery({
     queryKey: ["userInfo"],
     queryFn: getUserInfo,
     select: (data) => data.user,
+    retry: false,
   });
-
-  const { data: dogInfo, isLoading: dogLoading } = useQuery({
+  const {
+    data: dogInfo,
+    isLoading: dogLoading,
+    isError: dogError,
+  } = useQuery({
     queryKey: ["dogInfo"],
     queryFn: getDogInfo,
     select: (data) => data.dog,
     retry: false,
   });
+
+  useEffect(() => {
+    if (userInfo && dogInfo) {
+      reset({
+        userInfo: {
+          ...userInfo,
+          profilePhotoUrl: userInfo.profilePhotoUrl || fillUserImage.src,
+        },
+        dogInfo: {
+          ...dogInfo,
+          photo: dogInfo.profilePhotoUrl || emptyDogImage.src,
+        },
+      });
+    }
+  }, [userInfo, dogInfo, reset]);
+
+  const editUser = useMutation({
+    mutationFn: editUserInfo,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["userInfo"] }),
+  });
+
+  const editDog = useMutation({
+    mutationFn: editDogInfo,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["dogInfo"] }),
+  });
+
+  const onSubmit = useCallback(
+    async (data: ProfileForm) => {
+      try {
+        const formData = new FormData();
+        formData.append("file", data.userInfo.profilePhotoUrl);
+        const userHostedImage = await hostingImage(formData);
+        const userHostedImageId = userHostedImage.profilePhotoId;
+
+        const dogFormData = new FormData();
+        dogFormData.append("file", data.dogInfo.profilePhotoUrl);
+        const dogHostedImage = await hostingImage(dogFormData);
+        const dogHostedImageId = dogHostedImage.profilePhotoId;
+
+        // 유저 정보 업데이트
+        await editUser.mutateAsync({
+          nickName: data.userInfo.nickName,
+          profilePhotoId: userHostedImageId,
+        });
+
+        // 강아지 정보 업데이트
+        await editDog.mutateAsync({
+          name: data.dogInfo.name,
+          birthday: new Date(data.dogInfo.birthday),
+          firstMetAt: new Date(data.dogInfo.firstMetAt),
+          profilePhotoId: dogHostedImageId,
+        });
+
+        alert("저장되었습니다!");
+      } catch (error) {
+        console.error("Error updating info:", error);
+        alert("저장 중 오류가 발생했습니다.");
+      }
+    },
+    [editUser, editDog]
+  );
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     userInfo: false,
@@ -78,70 +142,29 @@ function MyPageContent() {
   ) => {
     if (hasFields(value)) {
       toggleSection(key);
-    } else {
-      // 각 메뉴별 동작 처리
-      switch (key) {
-        case "qa":
-          // 문의하기 페이지로 이동
-          break;
-        case "logout":
-          // 로그아웃 처리
-          break;
-        case "deleteAccount":
-          // 회원탈퇴 처리
-          break;
-      }
     }
   };
 
-  const { mutate: editUser } = useMutation({
-    mutationFn: editUserInfo,
-    onSuccess: () => {
-      // 유저 정보 업데이트 성공
-      queryClient.invalidateQueries({ queryKey: ["userInfo"] });
-    },
-  });
+  const dogPhoto = watch("dogInfo.profilePhotoUrl") as
+    | File
+    | string
+    | undefined;
+  const dogPhotoPreview =
+    dogPhoto instanceof File
+      ? URL.createObjectURL(dogPhoto)
+      : dogPhoto || emptyDogImage.src;
 
-  const { mutate: editDog } = useMutation({
-    mutationFn: editDogInfo,
-    onSuccess: () => {
-      // 강아지 정보 업데이트 성공
-      queryClient.invalidateQueries({ queryKey: ["dogInfo"] });
-    },
-  });
-
-  const onSubmit = async (data: ProfileForm) => {
-    try {
-      // 유저 정보 업데이트
-      await editUser({
-        nickName: data.userInfo.nickName,
-        profileImage: data.userInfo.profileImage,
-      });
-
-      // 강아지 정보 업데이트
-      await editDog({
-        name: data.dogInfo.name,
-        birthday: new Date(data.dogInfo.birthday),
-        firstMetAt: new Date(data.dogInfo.firstMetAt),
-        photo: data.dogInfo.photo,
-      });
-
-      // 성공 메시지 표시
-      alert("저장되었습니다!");
-    } catch (error) {
-      // 에러 처리
-      console.error("Error updating info:", error);
-      alert("저장 중 오류가 발생했습니다.");
-    }
-  };
-
-  useEffect(() => {
-    if (userInfo) setValue("userInfo.profileImage", userInfo.profileImage);
-    if (dogInfo) setValue("dogInfo.photo", dogInfo.photo || emptyDogImage.src);
-  }, [userInfo, dogInfo, setValue]);
+  const userPhoto = watch("userInfo.profilePhotoUrl") as
+    | File
+    | string
+    | undefined;
+  const userPhotoPreview =
+    userPhoto instanceof File
+      ? URL.createObjectURL(userPhoto)
+      : userPhoto || fillUserImage.src;
 
   if (userLoading || dogLoading) return <GeneralLoading />;
-  if (!userInfo || !dogInfo) return null;
+  if (userError || dogError) return <div>오류가 발생했습니다.</div>;
 
   return (
     <form
@@ -153,15 +176,12 @@ function MyPageContent() {
           <div className="relative w-16 h-16 group md:w-24 md:h-24">
             <div className="w-16 h-16 overflow-hidden rounded-full md:w-24 md:h-24">
               <Image
-                src={userInfo.profileImage}
+                src={userPhotoPreview}
                 alt="user"
                 width={96}
                 height={96}
                 className="object-cover w-full h-full"
               />
-              <div className="absolute bottom-0 right-0 z-30 p-1 bg-white rounded-full">
-                <Image src={Camera} alt="camera" width={20} height={20} />
-              </div>
             </div>
             <label
               htmlFor="userPhoto"
@@ -170,26 +190,28 @@ function MyPageContent() {
               <span className="text-sm text-white">사진 변경</span>
             </label>
             <input
+              {...register("userInfo.profilePhotoUrl")}
               type="file"
               id="userPhoto"
               accept="image/*"
               className="hidden"
-              {...register("userInfo.profileImage")}
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  setValue("userInfo.profilePhotoUrl", e.target.files[0]);
+                }
+              }}
             />
           </div>
           <Image src={heart} alt="heart" width={20} height={20} />
           <div className="relative w-16 h-16 group md:w-24 md:h-24">
             <div className="w-16 h-16 overflow-hidden rounded-full md:w-24 md:h-24">
               <Image
-                src={dogInfo.photo || emptyDogImage.src}
+                src={dogPhotoPreview}
                 alt="dog"
                 width={96}
                 height={96}
                 className="object-cover w-full h-full"
               />
-              <div className="absolute bottom-0 right-0 z-30 p-1 bg-white rounded-full">
-                <Image src={Camera} alt="camera" width={20} height={20} />
-              </div>
             </div>
             <label
               htmlFor="dogPhoto"
@@ -202,7 +224,12 @@ function MyPageContent() {
               id="dogPhoto"
               accept="image/*"
               className="hidden"
-              {...register("dogInfo.photo")}
+              {...register("dogInfo.profilePhotoUrl")}
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  setValue("dogInfo.profilePhotoUrl", e.target.files[0]);
+                }
+              }}
             />
           </div>
         </div>
@@ -299,7 +326,14 @@ function MyPageContent() {
         className="relative mx-auto transition-transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 w-fit"
         disabled={isSubmitting}
       >
-        <DogFootIcon className="text-black transition-colors duration-300 w-14 h-14 group-hover:text-main-yellow" />
+        <Image
+          src={dogFootIcon}
+          alt="dog foot"
+          width={56}
+          height={56}
+          className="text-black w-14 h-14 hover:text-main-yellow"
+          aria-label="register dog"
+        />
         <span className="absolute font-medium text-white -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
           {isSubmitting ? "저장 중..." : "저장"}
         </span>
@@ -307,6 +341,7 @@ function MyPageContent() {
     </form>
   );
 }
+
 export default function MyPage() {
   return (
     <div className={`${layout.flex.list.full} justify-between`}>

@@ -19,7 +19,7 @@ export default function UserInfoBox({
     >
       <div className="flex flex-row items-center gap-3">
         <Image
-          src={userInfo.profileImage}
+          src={userInfo.profilePhotoUrl}
           alt="user"
           width={30}
           height={30}

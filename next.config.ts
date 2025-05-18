@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   images: {
-    domains: ["k.kakaocdn.net"],
+    domains: ["k.kakaocdn.net", "objectstorage.ap-chuncheon-1.oraclecloud.com"],
     remotePatterns: [
       {
         protocol: "http",
