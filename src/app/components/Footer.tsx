@@ -15,7 +15,7 @@ const footerArry = [
   {
     label: "과거 일기",
     iconsrc: calendarImage,
-    path: "/answer",
+    path: "/calendar",
   },
   {
     label: "마이페이지",
