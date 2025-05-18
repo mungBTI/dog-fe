@@ -11,7 +11,7 @@ import { DogInfo, PostDogInfo } from "@/types/mainInfo";
 import { useRouter } from "next/navigation";
 import { hostingImage } from "@/api/common/common";
 
-export default function Page() {
+export default function RegisterDogClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userName = searchParams.get("nickName");
