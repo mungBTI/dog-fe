@@ -1,3 +1,16 @@
+export type file = File[] | null;
+
+export type UploadPhotoResponse = {
+  status: number;
+  message: string;
+  photos: UploadedPhoto[];
+};
+
+export type UploadedPhoto = {
+  id: string;
+  parUrl: string;
+};
+
 type Question = {
   id: string;
   text: string;
@@ -18,8 +31,8 @@ export type TodayAnswerResponse = {
 };
 
 export type EditAnswerForm = {
-  answer: string;
-  image: FileList | string | null;
+  answerText: string;
+  photoIds: string[] | null;
 };
 
 export type Name = {
@@ -37,7 +50,6 @@ export type Info = {
 
 export type ImagePreviewControl = {
   previewImage: string;
-  onRemove: () => void;
 };
 
 export type getAnswerDetail = {
