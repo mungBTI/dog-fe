@@ -9,10 +9,23 @@ import AnswerInfo from "../_components/AnswerInfo";
 import Upload from "../_components/Upload";
 import ImagePreview from "../_components/ImagePreview";
 import { useRouter } from "next/navigation";
-import { NewAnswerForm } from "@/types/answer";
+import { EditAnswerForm, TodayAnswerResponse } from "@/types/answer";
+import { getTodayAnswer } from "@/api/answer/getAnswer";
+import { useQuery } from "@tanstack/react-query";
+import GeneralLoading from "@/app/components/GeneralLoading";
 
 export default function New() {
   const router = useRouter();
+
+  const {
+    data: todayData,
+    isError: todayIsError,
+    error: todayError,
+    isLoading: todayIsLoading,
+  } = useQuery<TodayAnswerResponse, unknown>({
+    queryKey: ["today"],
+    queryFn: () => getTodayAnswer(),
+  });
 
   const {
     register,
@@ -20,12 +33,17 @@ export default function New() {
     watch,
     setValue,
     formState: { errors },
-  } = useForm<NewAnswerForm>();
+  } = useForm<EditAnswerForm>({
+    defaultValues: {
+      answer: todayData?.answer.answerText || "",
+      image: todayData?.answer.photoUrls[0] || null,
+    },
+  });
 
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(
+    todayData?.answer?.photoUrls[0] || null
+  );
   const imageFileList = watch("image");
-
-  const name = "세희";
 
   const today = new Date().toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -33,10 +51,13 @@ export default function New() {
     day: "2-digit",
   });
 
-  const text = "오늘의 질문";
+  // 이 부분의 임의 입니다.
+  const name = "세희";
 
   useEffect(() => {
-    if (imageFileList && imageFileList.length > 0) {
+    if (typeof imageFileList === "string" && imageFileList !== "") {
+      setPreviewImage(imageFileList);
+    } else if (imageFileList && imageFileList.length > 0) {
       const file = imageFileList[0];
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -48,7 +69,19 @@ export default function New() {
     }
   }, [imageFileList]);
 
-  const onSubmit = (data: NewAnswerForm) => {
+  if (todayIsError) {
+    console.error(`오류: ${(todayError as Error).message}`);
+  }
+
+  if (todayIsLoading) {
+    return (
+      <div className={`${layout.flex.list.full} item-center justify-center`}>
+        <GeneralLoading />
+      </div>
+    );
+  }
+
+  const onSubmit = (data: EditAnswerForm) => {
     console.log(data);
   };
 
@@ -60,7 +93,7 @@ export default function New() {
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
       <Today name={name} />
       <div className="flex flex-col items-start justify-start gap-1 w-full my-3">
-        <Question text={text} />
+        <Question text={todayData?.question.text} />
         <div className="flex justify-between w-full">
           <AnswerInfo count={1} date={today} />
           <div className="flex items-center gap-2">

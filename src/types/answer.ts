@@ -1,6 +1,20 @@
-export type NewAnswerForm = {
-  answer: string;
-  image: FileList | null;
+type Question = {
+  id: string;
+  text: string;
+};
+
+type Answer = {
+  id: string;
+  answerText: string;
+  photoUrls: string[];
+  isDraft: boolean;
+};
+
+export type TodayAnswerResponse = {
+  status: number;
+  message: string;
+  question: Question;
+  answer: Answer;
 };
 
 export type EditAnswerForm = {
@@ -13,7 +27,7 @@ export type Name = {
 };
 
 export type Text = {
-  text: string;
+  text?: string;
 };
 
 export type Info = {
