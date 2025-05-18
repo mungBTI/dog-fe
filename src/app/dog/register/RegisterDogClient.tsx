@@ -1,5 +1,4 @@
 "use client";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { textInput } from "@/styles/input";
@@ -11,11 +10,16 @@ import { DogInfo, PostDogInfo } from "@/types/mainInfo";
 import { useRouter } from "next/navigation";
 import { hostingImage } from "@/api/common/common";
 
-export default function RegisterDogClient() {
+export default function RegisterDogClient({
+  nickName,
+  profilePhotoUrl,
+}: {
+  nickName: string | null;
+  profilePhotoUrl: string | null;
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const userName = searchParams.get("nickName");
-  const userPhoto = searchParams.get("profilePhotoUrl");
+  const userName = nickName;
+  const userPhoto = profilePhotoUrl;
 
   const {
     register,
