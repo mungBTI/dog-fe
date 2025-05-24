@@ -45,11 +45,11 @@ export type Text = {
 
 export type Info = {
   count: number;
-  date: string;
+  date: string | undefined;
 };
 
 export type ImagePreviewControl = {
-  previewImage: string;
+  previewImage: string | undefined;
 };
 
 export type getAnswerDetail = {
@@ -64,4 +64,10 @@ export type getAnswerDetail = {
   updatedAt: string;
   id: string;
   photoUrls: string[];
+};
+
+export type getAnswerDetailResponse = {
+  status: number;
+  message: string;
+  answer: getAnswerDetail;
 };

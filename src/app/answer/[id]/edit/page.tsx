@@ -1,36 +1,21 @@
 "use client";
 
 import { layout } from "@/styles/layout";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import Today from "../_components/Today";
-import Question from "../_components/Question";
-import AnswerInfo from "../_components/AnswerInfo";
-import Upload from "../_components/Upload";
-import ImagePreview from "../_components/ImagePreview";
 import { useRouter } from "next/navigation";
-import {
-  EditAnswerForm,
-  TodayAnswerResponse,
-  UploadedPhoto,
-} from "@/types/answer";
-import { getTodayAnswer } from "@/api/answer/getAnswer";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import Today from "../../_components/Today";
+import Question from "../../_components/Question";
+import AnswerInfo from "../../_components/AnswerInfo";
+import Upload from "../../_components/Upload";
+import ImagePreview from "../../_components/ImagePreview";
+import { EditAnswerForm, getAnswerDetailResponse } from "@/types/answer";
+import { useQuery } from "@tanstack/react-query";
+import { getDetailAnswer } from "@/api/answer/getAnswer";
+import { useState } from "react";
 import GeneralLoading from "@/app/components/GeneralLoading";
-import { postTodayAnswer, uploadPhoto } from "@/api/answer/postAnswer";
 
 export default function New() {
   const router = useRouter();
-
-  const {
-    data: todayData,
-    isError: todayIsError,
-    error: todayError,
-    isLoading: todayIsLoading,
-  } = useQuery<TodayAnswerResponse, unknown>({
-    queryKey: ["today"],
-    queryFn: () => getTodayAnswer(),
-  });
 
   const {
     register,
@@ -39,44 +24,22 @@ export default function New() {
   } = useForm<EditAnswerForm>();
 
   const [previewImage, setPreviewImage] = useState<string[] | null>();
-  // const imageFileList = watch("photoIds");
-  const [photoIds, setPhotoIds] = useState<string[]>([]);
 
-  const today = new Date().toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
+  const {
+    data: getDetailData,
+    isError: getDetailIsError,
+    error: getDetailError,
+    isLoading: getDetailLoading,
+  } = useQuery<getAnswerDetailResponse, unknown>({
+    queryKey: ["getDetailAnswer"],
+    queryFn: () => getDetailAnswer("68223327959b5412d9d21703"), // 여기에 실제 answerId를 넣어야 합니다.
   });
 
-  // 이 부분의 임의 입니다.
-  const name = "세희";
-
-  const postMutation = useMutation({
-    mutationFn: postTodayAnswer,
-    onSuccess: () => {
-      router.push(`/main`);
-    },
-    onError: (error: unknown) => {
-      console.error(`오류: ${(error as Error).message}`);
-    },
-  });
-
-  const uploadMutation = useMutation({
-    mutationFn: uploadPhoto,
-    onSuccess: (data) => {
-      const getPhotoIds = data.photos.map((photo: UploadedPhoto) => photo.id);
-      setPhotoIds(getPhotoIds);
-    },
-    onError: (error: unknown) => {
-      console.error(`오류: ${(error as Error).message}`);
-    },
-  });
-
-  if (todayIsError) {
-    console.error(`오류: ${(todayError as Error).message}`);
+  if (getDetailIsError) {
+    console.error(`오류: ${(getDetailError as Error).message}`);
   }
 
-  if (todayIsLoading) {
+  if (getDetailLoading) {
     return (
       <div className={`${layout.flex.list.full} item-center justify-center`}>
         <GeneralLoading />
@@ -84,27 +47,33 @@ export default function New() {
     );
   }
 
-  const onSubmit = (data: EditAnswerForm) => {
-    postMutation.mutate({
-      answerText: data.answerText,
-      photoIds: photoIds,
-    });
+  const name = "세희";
+
+  const onSubmit = () => {
+    console.log("수정");
   };
 
   const handleBack = () => {
-    router.push(`/main`);
+    router.back();
+  };
+
+  const handleDelete = () => {
+    console.log("삭제");
   };
 
   return (
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
       <Today name={name} />
       <div className="flex flex-col items-start justify-start gap-1 w-full my-3">
-        <Question text={todayData?.question.text} />
+        <Question text={getDetailData?.answer.questionText} />
         <div className="flex justify-between w-full">
-          <AnswerInfo count={1} date={today} />
-          <div className="flex items-center gap-3">
-            <button form="answer-form">저장</button>
+          <AnswerInfo count={1} date={getDetailData?.answer.dateKey} />
+          <div className="flex items-center gap-2">
+            <button type="submit" form="answer-form">
+              수정
+            </button>
             <button onClick={handleBack}>취소</button>
+            <button onClick={handleDelete}>삭제</button>
           </div>
         </div>
       </div>
@@ -117,7 +86,7 @@ export default function New() {
           <textarea
             className="w-full bg-inherit resize-none overflow-hidden border-none outline-none"
             placeholder="답변 작성..."
-            defaultValue={todayData?.answer.answerText}
+            defaultValue={getDetailData?.answer.answerText}
             {...register("answerText", {
               required: {
                 value: true,
@@ -159,23 +128,20 @@ export default function New() {
                 fileArray.forEach((file) => {
                   formData.append("file", file);
                 });
-
-                uploadMutation.mutate(formData);
               }}
             />
-            <div className="flex flex-wrap gap-2">
-              {todayData?.answer?.photoUrls?.map((url, index) => (
-                <ImagePreview key={index} previewImage={url} />
-              ))}
-              {previewImage?.map((img, index) => (
-                <ImagePreview key={index} previewImage={img} />
-              ))}
-            </div>
+            {!previewImage && getDetailData?.answer?.photoUrls[0] && (
+              <ImagePreview previewImage={getDetailData.answer.photoUrls[0]} />
+            )}
+
+            {previewImage?.[0] && (
+              <ImagePreview previewImage={previewImage[0]} />
+            )}
             <label
               htmlFor="picture"
               className={`${layout.flex.column.center} w-full bg-white/50 cursor-pointer py-2 mt-2`}
             >
-              <Upload uploadType="사진 업로드" />
+              <Upload uploadType="사진 변경" />
             </label>
           </div>
         </form>

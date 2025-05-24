@@ -9,3 +9,13 @@ export const getTodayAnswer = async () => {
   }
   return data;
 };
+
+export const getDetailAnswer = async (answerId: string) => {
+  const response = await instance.get(`/answers/${answerId}/detail`);
+  const data = response.data;
+  if (data.status !== 0) {
+    const err = new Error(data.message);
+    throw err;
+  }
+  return data;
+};
