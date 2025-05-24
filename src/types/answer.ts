@@ -35,10 +35,6 @@ export type EditAnswerForm = {
   photoIds: string[] | null;
 };
 
-export type Name = {
-  name: string;
-};
-
 export type Text = {
   text?: string;
 };

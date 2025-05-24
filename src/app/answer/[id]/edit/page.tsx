@@ -3,16 +3,21 @@
 import { layout } from "@/styles/layout";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import Today from "../../_components/Today";
 import Question from "../../_components/Question";
 import AnswerInfo from "../../_components/AnswerInfo";
 import Upload from "../../_components/Upload";
 import ImagePreview from "../../_components/ImagePreview";
-import { EditAnswerForm, getAnswerDetailResponse } from "@/types/answer";
-import { useQuery } from "@tanstack/react-query";
+import {
+  EditAnswerForm,
+  getAnswerDetailResponse,
+  UploadedPhoto,
+} from "@/types/answer";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getDetailAnswer } from "@/api/answer/getAnswer";
 import { useState } from "react";
 import GeneralLoading from "@/app/components/GeneralLoading";
+import Feelings from "../../_components/Feelings";
+import { uploadPhoto } from "@/api/answer/postAnswer";
 
 export default function New() {
   const router = useRouter();
@@ -24,6 +29,7 @@ export default function New() {
   } = useForm<EditAnswerForm>();
 
   const [previewImage, setPreviewImage] = useState<string[] | null>();
+  const [photoIds, setPhotoIds] = useState<string[]>([]);
 
   const {
     data: getDetailData,
@@ -33,6 +39,17 @@ export default function New() {
   } = useQuery<getAnswerDetailResponse, unknown>({
     queryKey: ["getDetailAnswer"],
     queryFn: () => getDetailAnswer("68223327959b5412d9d21703"), // 여기에 실제 answerId를 넣어야 합니다.
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: uploadPhoto,
+    onSuccess: (data) => {
+      const getPhotoIds = data.photos.map((photo: UploadedPhoto) => photo.id);
+      setPhotoIds(getPhotoIds);
+    },
+    onError: (error: unknown) => {
+      console.error(`오류: ${(error as Error).message}`);
+    },
   });
 
   if (getDetailIsError) {
@@ -47,7 +64,23 @@ export default function New() {
     );
   }
 
-  const name = "세희";
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+    const fileArray = Array.from(files);
+    if (fileArray.length > 1) {
+      alert("사진 선택은 1장만 가능합니다.");
+      e.target.value = "";
+      return;
+    }
+    const previewUrls = URL.createObjectURL(fileArray[0]);
+    setPreviewImage([previewUrls]);
+    const formData = new FormData();
+    formData.append("file", fileArray[0]);
+    uploadMutation.mutate(formData);
+  };
 
   const onSubmit = () => {
     console.log("수정");
@@ -63,7 +96,7 @@ export default function New() {
 
   return (
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
-      <Today name={name} />
+      <Feelings />
       <div className="flex flex-col items-start justify-start gap-1 w-full my-3">
         <Question text={getDetailData?.answer.questionText} />
         <div className="flex justify-between w-full">
@@ -110,25 +143,7 @@ export default function New() {
               type="file"
               multiple={true}
               className="hidden"
-              onChange={(e) => {
-                const files = e.target.files;
-                if (!files || files.length === 0) {
-                  setPreviewImage(null);
-                  return;
-                }
-
-                const fileArray = Array.from(files);
-                const previewUrls = fileArray.map((file) =>
-                  URL.createObjectURL(file)
-                );
-                setPreviewImage(previewUrls);
-
-                const formData = new FormData();
-
-                fileArray.forEach((file) => {
-                  formData.append("file", file);
-                });
-              }}
+              onChange={handleFileChange}
             />
             {!previewImage && getDetailData?.answer?.photoUrls[0] && (
               <ImagePreview previewImage={getDetailData.answer.photoUrls[0]} />
