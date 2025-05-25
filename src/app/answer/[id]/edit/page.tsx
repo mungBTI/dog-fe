@@ -18,18 +18,19 @@ import { useState } from "react";
 import GeneralLoading from "@/app/components/GeneralLoading";
 import Feelings from "../../_components/Feelings";
 import { uploadPhoto } from "@/api/answer/postAnswer";
+import { patchAnswer } from "@/api/answer/patchAnswer";
 
 export default function New() {
   const router = useRouter();
+
+  const [previewImage, setPreviewImage] = useState<string[] | null>();
+  const [photoIds, setPhotoIds] = useState<string[]>([]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<EditAnswerForm>();
-
-  const [previewImage, setPreviewImage] = useState<string[] | null>();
-  const [photoIds, setPhotoIds] = useState<string[]>([]);
 
   const {
     data: getDetailData,
@@ -39,6 +40,7 @@ export default function New() {
   } = useQuery<getAnswerDetailResponse, unknown>({
     queryKey: ["getDetailAnswer"],
     queryFn: () => getDetailAnswer("68223327959b5412d9d21703"), // 여기에 실제 answerId를 넣어야 합니다.
+    refetchOnWindowFocus: false,
   });
 
   const uploadMutation = useMutation({
@@ -46,6 +48,16 @@ export default function New() {
     onSuccess: (data) => {
       const getPhotoIds = data.photos.map((photo: UploadedPhoto) => photo.id);
       setPhotoIds(getPhotoIds);
+    },
+    onError: (error: unknown) => {
+      console.error(`오류: ${(error as Error).message}`);
+    },
+  });
+
+  const patchMutation = useMutation({
+    mutationFn: patchAnswer,
+    onSuccess: () => {
+      router.back();
     },
     onError: (error: unknown) => {
       console.error(`오류: ${(error as Error).message}`);
@@ -82,17 +94,23 @@ export default function New() {
     uploadMutation.mutate(formData);
   };
 
-  const onSubmit = () => {
-    console.log("수정");
+  const onSubmit = (data: EditAnswerForm) => {
+    patchMutation.mutate({
+      answerId: "68223327959b5412d9d21703",
+      formData: {
+        answerText: data.answerText,
+        photoIds: photoIds,
+      },
+    });
   };
 
   const handleBack = () => {
     router.back();
   };
 
-  const handleDelete = () => {
-    console.log("삭제");
-  };
+  // const handleDelete = () => {
+  //   console.log("삭제");
+  // };
 
   return (
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
@@ -106,7 +124,7 @@ export default function New() {
               수정
             </button>
             <button onClick={handleBack}>취소</button>
-            <button onClick={handleDelete}>삭제</button>
+            {/* <button onClick={handleDelete}>삭제</button> */}
           </div>
         </div>
       </div>
