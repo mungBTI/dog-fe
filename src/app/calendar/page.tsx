@@ -181,7 +181,10 @@ export default function Calendar() {
         </div>
         <div className="w-[300px] md:w-[400px] h-12 text-left m-4 text-lg font-semibold">
           {questionData?.questionText ? (
-            <p onClick={() => onClick(questionData.id)}>
+            <p
+              onClick={() => onClick(questionData.id)}
+              className="cursor-pointer hover:text-main-yellow"
+            >
               {questionData?.questionText}
             </p>
           ) : (

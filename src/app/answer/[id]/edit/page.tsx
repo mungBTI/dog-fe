@@ -15,14 +15,14 @@ import {
 } from "@/types/answer";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getDetailAnswer } from "@/api/answer/getAnswer";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import GeneralLoading from "@/app/components/GeneralLoading";
 import Feelings from "../../_components/Feelings";
 import { uploadPhoto } from "@/api/answer/postAnswer";
 import { patchAnswer } from "@/api/answer/patchAnswer";
 
 export default function Edit({ params }: getAnswerId) {
-  const answerId = params.id;
+  const answerId = use(params).id;
   const router = useRouter();
 
   const [previewImage, setPreviewImage] = useState<string[] | null>();
@@ -185,7 +185,12 @@ export default function Edit({ params }: getAnswerId) {
               htmlFor="picture"
               className={`${layout.flex.column.center} w-full bg-white/50 cursor-pointer py-2 mt-2`}
             >
-              <Upload uploadType="사진 변경" />
+              {(previewImage && previewImage[0]) ||
+              getDetailData?.answer.photoUrls[0] ? (
+                <Upload uploadType="사진 변경" />
+              ) : (
+                <Upload uploadType="사진 업로드" />
+              )}
             </label>
           </div>
         </form>

@@ -1,7 +1,7 @@
 export type getAnswerId = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 export type file = File[] | null;
