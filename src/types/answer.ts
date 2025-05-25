@@ -1,3 +1,9 @@
+export type getAnswerId = {
+  params: {
+    id: string;
+  };
+};
+
 export type file = File[] | null;
 
 export type UploadPhotoResponse = {

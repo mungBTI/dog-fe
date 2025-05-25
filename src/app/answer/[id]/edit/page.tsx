@@ -10,17 +10,19 @@ import ImagePreview from "../../_components/ImagePreview";
 import {
   EditAnswerForm,
   getAnswerDetailResponse,
+  getAnswerId,
   UploadedPhoto,
 } from "@/types/answer";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getDetailAnswer } from "@/api/answer/getAnswer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GeneralLoading from "@/app/components/GeneralLoading";
 import Feelings from "../../_components/Feelings";
 import { uploadPhoto } from "@/api/answer/postAnswer";
 import { patchAnswer } from "@/api/answer/patchAnswer";
 
-export default function New() {
+export default function Edit({ params }: getAnswerId) {
+  const answerId = params.id;
   const router = useRouter();
 
   const [previewImage, setPreviewImage] = useState<string[] | null>();
@@ -29,6 +31,7 @@ export default function New() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<EditAnswerForm>();
 
@@ -39,9 +42,17 @@ export default function New() {
     isLoading: getDetailLoading,
   } = useQuery<getAnswerDetailResponse, unknown>({
     queryKey: ["getDetailAnswer"],
-    queryFn: () => getDetailAnswer("68223327959b5412d9d21703"), // 여기에 실제 answerId를 넣어야 합니다.
+    queryFn: () => getDetailAnswer(answerId),
     refetchOnWindowFocus: false,
   });
+
+  useEffect(() => {
+    if (getDetailData?.answer.answerText) {
+      reset({
+        answerText: getDetailData.answer.answerText,
+      });
+    }
+  }, [getDetailData, reset]);
 
   const uploadMutation = useMutation({
     mutationFn: uploadPhoto,
@@ -96,7 +107,7 @@ export default function New() {
 
   const onSubmit = (data: EditAnswerForm) => {
     patchMutation.mutate({
-      answerId: "68223327959b5412d9d21703",
+      answerId: answerId,
       formData: {
         answerText: data.answerText,
         photoIds: photoIds,

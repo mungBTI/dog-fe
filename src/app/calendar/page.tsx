@@ -15,8 +15,10 @@ import {
   QuestionResponse,
 } from "@/types/calendar";
 import GeneralLoading from "../components/GeneralLoading";
+import { useRouter } from "next/navigation";
 
 export default function Calendar() {
+  const router = useRouter();
   const today = new Date();
 
   const [month, setMonth] = useState(today);
@@ -88,6 +90,10 @@ export default function Calendar() {
       </div>
     );
   }
+
+  const onClick = (answerId: string) => {
+    router.push(`/answer/${answerId}/edit`);
+  };
 
   return (
     <div className={`${layout.flex.list.full} justify-between`}>
@@ -174,11 +180,13 @@ export default function Calendar() {
           {selected?.toLocaleDateString()}
         </div>
         <div className="w-[300px] md:w-[400px] h-12 text-left m-4 text-lg font-semibold">
-          <p>
-            {questionData?.questionText
-              ? questionData?.questionText
-              : "기록하지 않은 날입니다."}
-          </p>
+          {questionData?.questionText ? (
+            <p onClick={() => onClick(questionData.id)}>
+              {questionData?.questionText}
+            </p>
+          ) : (
+            <p>기록하지 않은 날입니다.</p>
+          )}
         </div>
       </div>
       <Footer />
