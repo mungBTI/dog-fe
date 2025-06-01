@@ -20,6 +20,7 @@ import GeneralLoading from "@/app/components/GeneralLoading";
 import Feelings from "../../_components/Feelings";
 import { uploadPhoto } from "@/api/answer/postAnswer";
 import { patchAnswer } from "@/api/answer/patchAnswer";
+import { deleteAnswer } from "@/api/answer/deleteAnswer";
 
 export default function Edit({ params }: getAnswerId) {
   const answerId = use(params).id;
@@ -41,7 +42,7 @@ export default function Edit({ params }: getAnswerId) {
     error: getDetailError,
     isLoading: getDetailLoading,
   } = useQuery<getAnswerDetailResponse, unknown>({
-    queryKey: ["getDetailAnswer"],
+    queryKey: ["getDetailAnswer", answerId],
     queryFn: () => getDetailAnswer(answerId),
     refetchOnWindowFocus: false,
   });
@@ -67,6 +68,16 @@ export default function Edit({ params }: getAnswerId) {
 
   const patchMutation = useMutation({
     mutationFn: patchAnswer,
+    onSuccess: () => {
+      router.back();
+    },
+    onError: (error: unknown) => {
+      console.error(`오류: ${(error as Error).message}`);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteAnswer,
     onSuccess: () => {
       router.back();
     },
@@ -119,9 +130,17 @@ export default function Edit({ params }: getAnswerId) {
     router.back();
   };
 
-  // const handleDelete = () => {
-  //   console.log("삭제");
-  // };
+  const handleDelete = () => {
+    if (confirm("정말로 답변을 삭제하시겠습니까?")) {
+      deleteMutation.mutate({ answerId: answerId });
+    }
+  };
+
+  const today = new Date();
+  const formattedToday = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const isToday = getDetailData?.answer.dateKey === formattedToday;
 
   return (
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
@@ -135,7 +154,7 @@ export default function Edit({ params }: getAnswerId) {
               수정
             </button>
             <button onClick={handleBack}>취소</button>
-            {/* <button onClick={handleDelete}>삭제</button> */}
+            {!isToday && <button onClick={handleDelete}>삭제</button>}
           </div>
         </div>
       </div>

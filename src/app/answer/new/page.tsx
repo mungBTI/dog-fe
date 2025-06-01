@@ -42,11 +42,10 @@ export default function New() {
   const [previewImage, setPreviewImage] = useState<string[] | null>(null);
   const [photoIds, setPhotoIds] = useState<string[]>([]);
 
-  const today = new Date().toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+  const today = new Date();
+  const formattedToday = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   const postMutation = useMutation({
     mutationFn: postTodayAnswer,
@@ -116,7 +115,7 @@ export default function New() {
       <div className="flex flex-col items-start justify-start gap-1 w-full my-3">
         <Question text={todayData?.question.text} />
         <div className="flex justify-between w-full">
-          <AnswerInfo count={1} date={today} />
+          <AnswerInfo count={1} date={formattedToday} />
           <div className="flex items-center gap-3">
             <button form="answer-form">저장</button>
             <button onClick={handleBack}>취소</button>

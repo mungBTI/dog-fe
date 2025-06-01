@@ -1,3 +1,7 @@
+export type answerId = {
+  answerId: string;
+};
+
 export type getAnswerId = {
   params: Promise<{
     id: string;
