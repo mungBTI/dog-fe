@@ -31,6 +31,8 @@ type Answer = {
   answerText: string;
   photoUrls: string[];
   isDraft: boolean;
+  mood: string;
+  order: number;
 };
 
 export type TodayAnswerResponse = {
@@ -43,6 +45,12 @@ export type TodayAnswerResponse = {
 export type EditAnswerForm = {
   answerText: string;
   photoIds: string[] | null;
+  mood: string | null;
+};
+
+export type MoodSelect = {
+  mood: string | null;
+  onMoodSelect?: (mood: string) => void;
 };
 
 export type Text = {
@@ -70,6 +78,8 @@ export type getAnswerDetail = {
   updatedAt: string;
   id: string;
   photoUrls: string[];
+  mood: string;
+  order: number;
 };
 
 export type getAnswerDetailResponse = {

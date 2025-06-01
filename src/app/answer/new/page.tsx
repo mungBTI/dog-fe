@@ -1,7 +1,7 @@
 "use client";
 
 import { layout } from "@/styles/layout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Question from "../_components/Question";
 import AnswerInfo from "../_components/AnswerInfo";
@@ -17,10 +17,21 @@ import { getTodayAnswer } from "@/api/answer/getAnswer";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import GeneralLoading from "@/app/components/GeneralLoading";
 import { postTodayAnswer, uploadPhoto } from "@/api/answer/postAnswer";
-import Feelings from "../_components/Feelings";
+import Mood from "../_components/Mood";
 
 export default function New() {
   const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<EditAnswerForm>();
+
+  const currentMood = watch("mood");
 
   const {
     data: todayData,
@@ -33,11 +44,14 @@ export default function New() {
     refetchOnWindowFocus: false,
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<EditAnswerForm>();
+  useEffect(() => {
+    if (todayData?.answer) {
+      reset({
+        answerText: todayData.answer.answerText,
+        mood: todayData.answer.mood,
+      });
+    }
+  }, [todayData, reset]);
 
   const [previewImage, setPreviewImage] = useState<string[] | null>(null);
   const [photoIds, setPhotoIds] = useState<string[]>([]);
@@ -98,10 +112,15 @@ export default function New() {
     uploadMutation.mutate(formData);
   };
 
+  const handleMoodSelect = (mood: string) => {
+    setValue("mood", mood);
+  };
+
   const onSubmit = (data: EditAnswerForm) => {
     postMutation.mutate({
       answerText: data.answerText,
       photoIds: photoIds,
+      mood: data.mood,
     });
   };
 
@@ -111,11 +130,14 @@ export default function New() {
 
   return (
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
-      <Feelings />
+      <Mood mood={currentMood} onMoodSelect={handleMoodSelect} />
       <div className="flex flex-col items-start justify-start gap-1 w-full my-3">
         <Question text={todayData?.question.text} />
         <div className="flex justify-between w-full">
-          <AnswerInfo count={1} date={formattedToday} />
+          <AnswerInfo
+            count={todayData?.answer.order ?? 1}
+            date={formattedToday}
+          />
           <div className="flex items-center gap-3">
             <button form="answer-form">저장</button>
             <button onClick={handleBack}>취소</button>
@@ -131,7 +153,6 @@ export default function New() {
           <textarea
             className="w-full bg-inherit resize-none overflow-hidden border-none outline-none"
             placeholder="답변 작성..."
-            defaultValue={todayData?.answer.answerText}
             {...register("answerText", {
               required: {
                 value: true,

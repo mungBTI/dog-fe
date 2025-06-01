@@ -17,7 +17,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getDetailAnswer } from "@/api/answer/getAnswer";
 import { use, useEffect, useState } from "react";
 import GeneralLoading from "@/app/components/GeneralLoading";
-import Feelings from "../../_components/Feelings";
+import Mood from "../../_components/Mood";
 import { uploadPhoto } from "@/api/answer/postAnswer";
 import { patchAnswer } from "@/api/answer/patchAnswer";
 import { deleteAnswer } from "@/api/answer/deleteAnswer";
@@ -33,8 +33,12 @@ export default function Edit({ params }: getAnswerId) {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<EditAnswerForm>();
+
+  const currentMood = watch("mood");
 
   const {
     data: getDetailData,
@@ -48,9 +52,10 @@ export default function Edit({ params }: getAnswerId) {
   });
 
   useEffect(() => {
-    if (getDetailData?.answer.answerText) {
+    if (getDetailData?.answer) {
       reset({
         answerText: getDetailData.answer.answerText,
+        mood: getDetailData.answer.mood,
       });
     }
   }, [getDetailData, reset]);
@@ -116,12 +121,17 @@ export default function Edit({ params }: getAnswerId) {
     uploadMutation.mutate(formData);
   };
 
+  const handleMoodSelect = (mood: string) => {
+    setValue("mood", mood);
+  };
+
   const onSubmit = (data: EditAnswerForm) => {
     patchMutation.mutate({
       answerId: answerId,
       formData: {
         answerText: data.answerText,
         photoIds: photoIds,
+        mood: data.mood,
       },
     });
   };
@@ -144,11 +154,14 @@ export default function Edit({ params }: getAnswerId) {
 
   return (
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
-      <Feelings />
+      <Mood mood={currentMood} onMoodSelect={handleMoodSelect} />
       <div className="flex flex-col items-start justify-start gap-1 w-full my-3">
         <Question text={getDetailData?.answer.questionText} />
         <div className="flex justify-between w-full">
-          <AnswerInfo count={1} date={getDetailData?.answer.dateKey} />
+          <AnswerInfo
+            count={getDetailData?.answer.order ?? 1}
+            date={getDetailData?.answer.dateKey}
+          />
           <div className="flex items-center gap-2">
             <button type="submit" form="answer-form">
               수정

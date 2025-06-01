@@ -36,7 +36,7 @@ export default function Calendar() {
       { year: month.getFullYear(), month: month.getMonth() + 1 },
     ],
     queryFn: () => getMonthAnswer(month.getFullYear(), month.getMonth() + 1),
-    select: (data) => data.answers,
+    select: (data) => data.answers.filter((answer) => !answer.isDraft),
   });
 
   if (listIsError) {
