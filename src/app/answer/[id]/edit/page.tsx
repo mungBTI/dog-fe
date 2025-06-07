@@ -27,7 +27,7 @@ export default function Edit({ params }: getAnswerId) {
   const router = useRouter();
 
   const [previewImage, setPreviewImage] = useState<string[] | null>();
-  const [photoIds, setPhotoIds] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const {
     register,
@@ -62,13 +62,6 @@ export default function Edit({ params }: getAnswerId) {
 
   const uploadMutation = useMutation({
     mutationFn: uploadPhoto,
-    onSuccess: (data) => {
-      const getPhotoIds = data.photos.map((photo: UploadedPhoto) => photo.id);
-      setPhotoIds(getPhotoIds);
-    },
-    onError: (error: unknown) => {
-      console.error(`오류: ${(error as Error).message}`);
-    },
   });
 
   const patchMutation = useMutation({
@@ -116,24 +109,46 @@ export default function Edit({ params }: getAnswerId) {
     }
     const previewUrls = URL.createObjectURL(fileArray[0]);
     setPreviewImage([previewUrls]);
-    const formData = new FormData();
-    formData.append("file", fileArray[0]);
-    uploadMutation.mutate(formData);
+    setSelectedFiles(fileArray);
   };
 
   const handleMoodSelect = (mood: string) => {
     setValue("mood", mood);
   };
 
-  const onSubmit = (data: EditAnswerForm) => {
-    patchMutation.mutate({
+  const onSubmit = async (data: EditAnswerForm) => {
+    let photoIds: string[] = [];
+
+    if (selectedFiles.length > 0) {
+      const formData = new FormData();
+      formData.append("file", selectedFiles[0]);
+      try {
+        const uploadResult = await uploadMutation.mutateAsync(formData);
+        photoIds = uploadResult.photos.map((photo: UploadedPhoto) => photo.id);
+      } catch (error) {
+        console.error(`사진 업로드 오류: ${(error as Error).message}`);
+        return;
+      }
+    }
+
+    if (
+      getDetailData?.answer.answerText === data.answerText &&
+      getDetailData?.answer.mood === data.mood &&
+      photoIds.length === 0
+    ) {
+      alert("변경된 내용이 없습니다.");
+      return;
+    }
+
+    const submitData = {
       answerId: answerId,
       formData: {
         answerText: data.answerText,
-        photoIds: photoIds,
-        mood: data.mood,
+        ...(data.mood !== getDetailData?.answer?.mood && { mood: data.mood }),
+        ...(photoIds.length > 0 && { photoIds }),
       },
-    });
+    };
+    patchMutation.mutate(submitData);
   };
 
   const handleBack = () => {
@@ -180,7 +195,6 @@ export default function Edit({ params }: getAnswerId) {
           <textarea
             className="w-full bg-inherit resize-none overflow-hidden border-none outline-none"
             placeholder="답변 작성..."
-            defaultValue={getDetailData?.answer.answerText}
             {...register("answerText", {
               required: {
                 value: true,

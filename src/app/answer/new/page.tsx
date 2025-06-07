@@ -42,6 +42,8 @@ export default function New() {
     queryKey: ["today"],
     queryFn: () => getTodayAnswer(),
     refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function New() {
   }, [todayData, reset]);
 
   const [previewImage, setPreviewImage] = useState<string[] | null>(null);
-  const [photoIds, setPhotoIds] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const today = new Date();
   const formattedToday = `${today.getFullYear()}-${String(
@@ -73,13 +75,6 @@ export default function New() {
 
   const uploadMutation = useMutation({
     mutationFn: uploadPhoto,
-    onSuccess: (data) => {
-      const getPhotoIds = data.photos.map((photo: UploadedPhoto) => photo.id);
-      setPhotoIds(getPhotoIds);
-    },
-    onError: (error: unknown) => {
-      console.error(`오류: ${(error as Error).message}`);
-    },
   });
 
   if (todayIsError) {
@@ -107,21 +102,34 @@ export default function New() {
     }
     const previewUrls = URL.createObjectURL(fileArray[0]);
     setPreviewImage([previewUrls]);
-    const formData = new FormData();
-    formData.append("file", fileArray[0]);
-    uploadMutation.mutate(formData);
+    setSelectedFiles(fileArray);
   };
 
   const handleMoodSelect = (mood: string) => {
     setValue("mood", mood);
   };
 
-  const onSubmit = (data: EditAnswerForm) => {
-    postMutation.mutate({
+  const onSubmit = async (data: EditAnswerForm) => {
+    let photoIds: string[] = [];
+
+    if (selectedFiles.length > 0) {
+      const formData = new FormData();
+      formData.append("file", selectedFiles[0]);
+      try {
+        const uploadResult = await uploadMutation.mutateAsync(formData);
+        photoIds = uploadResult.photos.map((photo: UploadedPhoto) => photo.id);
+      } catch (error) {
+        console.error(`사진 업로드 오류: ${(error as Error).message}`);
+        return;
+      }
+    }
+
+    const submitData = {
       answerText: data.answerText,
-      photoIds: photoIds,
-      mood: data.mood,
-    });
+      ...(data.mood !== todayData?.answer?.mood && { mood: data.mood }),
+      ...(photoIds.length > 0 && { photoIds }),
+    };
+    postMutation.mutate(submitData);
   };
 
   const handleBack = () => {

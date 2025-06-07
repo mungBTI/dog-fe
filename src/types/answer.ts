@@ -44,12 +44,12 @@ export type TodayAnswerResponse = {
 
 export type EditAnswerForm = {
   answerText: string;
-  photoIds: string[] | null;
-  mood: string | null;
+  photoIds?: string[] | null;
+  mood?: string | null;
 };
 
 export type MoodSelect = {
-  mood: string | null;
+  mood?: string | null;
   onMoodSelect?: (mood: string) => void;
 };
 
