@@ -99,7 +99,7 @@ export default function Calendar() {
     <div className={`${layout.flex.list.full} justify-between`}>
       <Header />
       <div
-        className={`${layout.flex.column.fullWidth} items-center justify-center my-4 gap-5`}
+        className={`${layout.flex.list.full} items-center justify-center p-4`}
       >
         <DayPicker
           hideNavigation
@@ -165,7 +165,7 @@ export default function Calendar() {
           }}
         />
         <div>
-          <div className="flex justify-end w-[300px] md:w-[400px] text-main-yellow font-semibold">
+          <div className="flex justify-end w-[300px] md:w-[400px] mt-1 text-main-yellow font-semibold">
             <button
               onClick={() => {
                 setMonth(today);

@@ -7,10 +7,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <MobileLayout>
       <div className={`${layout.flex.list.full} justify-between`}>
-        <Header />
+        <div className="mb-3">
+          <Header />
+        </div>
         {children}
+        <div className="mt-3">
+          <Footer />
+        </div>
       </div>
-      <Footer />
     </MobileLayout>
   );
 }
