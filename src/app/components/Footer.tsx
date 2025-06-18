@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import DogFootIcon from "@/image/dog_foot.svg";
+import DogFootIcon from "../../image/dog_foot.svg";
 import calendarImage from "../../../public/icons/calendar.png";
 import userImage from "../../../public/icons/person.png";
 import { useRouter } from "next/navigation";

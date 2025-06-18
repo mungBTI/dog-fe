@@ -1,6 +1,7 @@
 export type Answers = {
   id: string;
   date: number;
+  isDraft: boolean;
 };
 
 export type AnswerResponse = {

@@ -1,9 +1,8 @@
 "use client";
 
 import { layout } from "@/styles/layout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import Today from "../_components/Today";
 import Question from "../_components/Question";
 import AnswerInfo from "../_components/AnswerInfo";
 import Upload from "../_components/Upload";
@@ -18,9 +17,21 @@ import { getTodayAnswer } from "@/api/answer/getAnswer";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import GeneralLoading from "@/app/components/GeneralLoading";
 import { postTodayAnswer, uploadPhoto } from "@/api/answer/postAnswer";
+import Mood from "../_components/Mood";
 
 export default function New() {
   const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<EditAnswerForm>();
+
+  const currentMood = watch("mood");
 
   const {
     data: todayData,
@@ -30,32 +41,33 @@ export default function New() {
   } = useQuery<TodayAnswerResponse, unknown>({
     queryKey: ["today"],
     queryFn: () => getTodayAnswer(),
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<EditAnswerForm>();
+  useEffect(() => {
+    if (todayData?.answer) {
+      reset({
+        answerText: todayData.answer.answerText,
+        mood: todayData.answer.mood,
+      });
+    }
+  }, [todayData, reset]);
 
-  const [previewImage, setPreviewImage] = useState<string[] | null>();
-  // const imageFileList = watch("photoIds");
-  const [photoIds, setPhotoIds] = useState<string[]>([]);
+  const [previewImage, setPreviewImage] = useState<string[] | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const today = new Date().toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-
-  // 이 부분의 임의 입니다.
-  const name = "세희";
+  const today = new Date();
+  const formattedToday = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   const postMutation = useMutation({
     mutationFn: postTodayAnswer,
-    onSuccess: () => {
-      router.push(`/main`);
+    onSuccess: (data) => {
+      const answerId = data.answer.id;
+      router.push(`${answerId}/edit`);
     },
     onError: (error: unknown) => {
       console.error(`오류: ${(error as Error).message}`);
@@ -64,17 +76,6 @@ export default function New() {
 
   const uploadMutation = useMutation({
     mutationFn: uploadPhoto,
-    onSuccess: (data) => {
-      const getPhotoIds = data.photos.map((photo: UploadedPhoto) => photo.id);
-      setPhotoIds(getPhotoIds);
-      postMutation.mutate({
-        answerText: watch("answerText"),
-        photoIds: getPhotoIds,
-      });
-    },
-    onError: (error: unknown) => {
-      console.error(`오류: ${(error as Error).message}`);
-    },
   });
 
   if (todayIsError) {
@@ -82,34 +83,64 @@ export default function New() {
   }
 
   if (todayIsLoading) {
-    return (
-      <div className={`${layout.flex.list.full} item-center justify-center`}>
-        <GeneralLoading />
-      </div>
-    );
+    return <GeneralLoading />;
   }
 
-  const onSubmit = (data: EditAnswerForm) => {
-    postMutation.mutate({
-      answerText: data.answerText,
-      photoIds: photoIds,
-    });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) {
+      return;
+    }
+    const fileArray = Array.from(files);
+    if (fileArray.length > 1) {
+      alert("사진 선택은 1장만 가능합니다.");
+      e.target.value = "";
+      return;
+    }
+    const previewUrls = URL.createObjectURL(fileArray[0]);
+    setPreviewImage([previewUrls]);
+    setSelectedFiles(fileArray);
   };
 
-  const handleBack = () => {
-    router.push(`/main`);
+  const handleMoodSelect = (mood: string) => {
+    setValue("mood", mood);
+  };
+
+  const onSubmit = async (data: EditAnswerForm) => {
+    let photoIds: string[] = [];
+
+    if (selectedFiles.length > 0) {
+      const formData = new FormData();
+      formData.append("file", selectedFiles[0]);
+      try {
+        const uploadResult = await uploadMutation.mutateAsync(formData);
+        photoIds = uploadResult.photos.map((photo: UploadedPhoto) => photo.id);
+      } catch (error) {
+        console.error(`사진 업로드 오류: ${(error as Error).message}`);
+        return;
+      }
+    }
+
+    const submitData = {
+      answerText: data.answerText,
+      ...(data.mood !== todayData?.answer?.mood && { mood: data.mood }),
+      ...(photoIds.length > 0 && { photoIds }),
+    };
+    postMutation.mutate(submitData);
   };
 
   return (
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
-      <Today name={name} />
+      <Mood mood={currentMood} onMoodSelect={handleMoodSelect} />
       <div className="flex flex-col items-start justify-start gap-1 w-full my-3">
         <Question text={todayData?.question.text} />
         <div className="flex justify-between w-full">
-          <AnswerInfo count={1} date={today} />
+          <AnswerInfo
+            count={todayData?.answer.order ?? 1}
+            date={formattedToday}
+          />
           <div className="flex items-center gap-3">
             <button form="answer-form">저장</button>
-            <button onClick={handleBack}>취소</button>
           </div>
         </div>
       </div>
@@ -122,7 +153,6 @@ export default function New() {
           <textarea
             className="w-full bg-inherit resize-none overflow-hidden border-none outline-none"
             placeholder="답변 작성..."
-            defaultValue={todayData?.answer.answerText}
             {...register("answerText", {
               required: {
                 value: true,
@@ -146,42 +176,25 @@ export default function New() {
               type="file"
               multiple={true}
               className="hidden"
-              onChange={(e) => {
-                const files = e.target.files;
-                console.log(files);
-                if (!files || files.length === 0) {
-                  setPreviewImage(null);
-                  return;
-                }
-
-                const fileArray = Array.from(files);
-                const previewUrls = fileArray.map((file) =>
-                  URL.createObjectURL(file)
-                );
-                setPreviewImage(previewUrls);
-
-                const formData = new FormData();
-
-                fileArray.forEach((file) => {
-                  formData.append("file", file);
-                });
-
-                uploadMutation.mutate(formData);
-              }}
+              onChange={handleFileChange}
             />
             <div className="flex flex-wrap gap-2">
-              {todayData?.answer?.photoUrls?.map((url, index) => (
-                <ImagePreview key={index} previewImage={url} />
-              ))}
-              {previewImage?.map((img, index) => (
-                <ImagePreview key={index} previewImage={img} />
-              ))}
+              {!previewImage && todayData?.answer.photoUrls[0] && (
+                <ImagePreview previewImage={todayData.answer.photoUrls[0]} />
+              )}
+              {previewImage && previewImage[0] && (
+                <ImagePreview previewImage={previewImage[0]} />
+              )}
             </div>
             <label
               htmlFor="picture"
               className={`${layout.flex.column.center} w-full bg-white/50 cursor-pointer py-2 mt-2`}
             >
-              <Upload />
+              {previewImage && previewImage[0] ? (
+                <Upload uploadType="사진 변경" />
+              ) : (
+                <Upload uploadType="사진 업로드" />
+              )}
             </label>
           </div>
         </form>

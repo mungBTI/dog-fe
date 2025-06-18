@@ -6,7 +6,7 @@ export default function GeneralLoading() {
   return (
     <MobileLayout>
       <div
-        className={`${layout.flex.column.center} h-full w-[300px] md:w-[400px] `}
+        className={`${layout.flex.column.center} h-full w-[300px] md:w-[400px] mx-auto`}
       >
         <Image
           src="/image/foot_loading.gif"

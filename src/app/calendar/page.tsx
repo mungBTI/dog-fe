@@ -15,8 +15,10 @@ import {
   QuestionResponse,
 } from "@/types/calendar";
 import GeneralLoading from "../components/GeneralLoading";
+import { useRouter } from "next/navigation";
 
 export default function Calendar() {
+  const router = useRouter();
   const today = new Date();
 
   const [month, setMonth] = useState(today);
@@ -34,7 +36,7 @@ export default function Calendar() {
       { year: month.getFullYear(), month: month.getMonth() + 1 },
     ],
     queryFn: () => getMonthAnswer(month.getFullYear(), month.getMonth() + 1),
-    select: (data) => data.answers,
+    select: (data) => data.answers.filter((answer) => !answer.isDraft),
   });
 
   if (listIsError) {
@@ -82,18 +84,18 @@ export default function Calendar() {
   }
 
   if (listIsLoading || questionIsLoading) {
-    return (
-      <div className={`${layout.flex.list.full} item-center justify-center`}>
-        <GeneralLoading />
-      </div>
-    );
+    return <GeneralLoading />;
   }
+
+  const onClick = (answerId: string) => {
+    router.push(`/answer/${answerId}/edit`);
+  };
 
   return (
     <div className={`${layout.flex.list.full} justify-between`}>
       <Header />
       <div
-        className={`${layout.flex.column.fullWidth} items-center justify-center my-4 gap-5`}
+        className={`${layout.flex.list.full} items-center justify-center p-4`}
       >
         <DayPicker
           hideNavigation
@@ -159,7 +161,7 @@ export default function Calendar() {
           }}
         />
         <div>
-          <div className="flex justify-end w-[300px] md:w-[400px] text-main-yellow font-semibold">
+          <div className="flex justify-end w-[300px] md:w-[400px] mt-1 text-main-yellow font-semibold">
             <button
               onClick={() => {
                 setMonth(today);
@@ -170,15 +172,23 @@ export default function Calendar() {
             </button>
           </div>
         </div>
-        <div className="w-[300px] md:w-[400px] h-5 text-left mt-4 text-lg font-semibold">
-          {selected?.toLocaleDateString()}
+        <div className="flex gap-2 w-[300px] md:w-[400px] h-5 text-left mt-4 text-lg font-semibold">
+          <div>{selected?.toLocaleDateString()}</div>
+          {questionData && (
+            <div
+              className="cursor-pointer"
+              onClick={() => onClick(questionData.id)}
+            >
+              {"\u{270F}\u{FE0F}"}
+            </div>
+          )}
         </div>
         <div className="w-[300px] md:w-[400px] h-12 text-left m-4 text-lg font-semibold">
-          <p>
-            {questionData?.questionText
-              ? questionData?.questionText
-              : "기록하지 않은 날입니다."}
-          </p>
+          {questionData?.questionText ? (
+            <p>{questionData?.questionText}</p>
+          ) : (
+            <p>기록하지 않은 날입니다.</p>
+          )}
         </div>
       </div>
       <Footer />

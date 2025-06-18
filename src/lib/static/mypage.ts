@@ -1,7 +1,7 @@
 import UserImg from "../../../public/icons/person.png";
 import DogImg from "../../../public/icons/dogIcon.png";
 // import QaImg from "../../../public/icons/question.png";
-// import LogoutImg from "../../../public/icons/sign-out.png";
+import LogoutImg from "../../../public/icons/sign-out.png";
 // import DeleteImg from "../../../public/icons/trash.png";
 
 export const mypageList = {
@@ -32,14 +32,10 @@ export const mypageList = {
       },
     ],
   },
-  // qa: {
-  //   label: "문의하기",
-  //   icon: QaImg,
-  // },
-  // logout: {
-  //   label: "로그아웃",
-  //   icon: LogoutImg,
-  // },
+  logout: {
+    label: "로그아웃",
+    icon: LogoutImg,
+  },
   // deleteAccount: {
   //   label: "회원탈퇴",
   //   icon: DeleteImg,

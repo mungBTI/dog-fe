@@ -1,3 +1,13 @@
+export type answerId = {
+  answerId: string;
+};
+
+export type getAnswerId = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
 export type file = File[] | null;
 
 export type UploadPhotoResponse = {
@@ -21,6 +31,8 @@ type Answer = {
   answerText: string;
   photoUrls: string[];
   isDraft: boolean;
+  mood: string;
+  order: number;
 };
 
 export type TodayAnswerResponse = {
@@ -32,11 +44,13 @@ export type TodayAnswerResponse = {
 
 export type EditAnswerForm = {
   answerText: string;
-  photoIds: string[] | null;
+  photoIds?: string[] | null;
+  mood?: string | null;
 };
 
-export type Name = {
-  name: string;
+export type MoodSelect = {
+  mood?: string | null;
+  onMoodSelect?: (mood: string) => void;
 };
 
 export type Text = {
@@ -45,11 +59,11 @@ export type Text = {
 
 export type Info = {
   count: number;
-  date: string;
+  date: string | undefined;
 };
 
 export type ImagePreviewControl = {
-  previewImage: string;
+  previewImage: string | undefined;
 };
 
 export type getAnswerDetail = {
@@ -64,4 +78,12 @@ export type getAnswerDetail = {
   updatedAt: string;
   id: string;
   photoUrls: string[];
+  mood: string;
+  order: number;
+};
+
+export type getAnswerDetailResponse = {
+  status: number;
+  message: string;
+  answer: getAnswerDetail;
 };
