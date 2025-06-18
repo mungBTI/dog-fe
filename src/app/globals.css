@@ -11,3 +11,6 @@
 body {
   @apply bg-paper bg-cover bg-center bg-fixed;
 }
+.nextjs-toast {
+  display: none !important;
+}

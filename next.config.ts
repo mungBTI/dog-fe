@@ -14,12 +14,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "http",
-        hostname: "k.kakaocdn.net",
+        hostname: "*.kakaocdn.net",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "k.kakaocdn.net",
+        hostname: "*.kakaocdn.net",
         pathname: "/**",
       },
     ],
