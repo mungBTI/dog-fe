@@ -77,9 +77,9 @@ export default function RegisterDogClient({
   };
 
   return (
-    <div className="flex flex-col justify-center h-full gap-4">
-      <div className="flex flex-row items-center justify-center gap-2">
-        <div className="overflow-hidden rounded-full w-9 h-9">
+    <div className="flex flex-col gap-4 justify-center h-full">
+      <div className="flex flex-row gap-2 justify-center items-center">
+        <div className="overflow-hidden w-9 h-9 rounded-full">
           <Image
             src={userPhoto || fillUserImage}
             alt="user profile"
@@ -92,11 +92,11 @@ export default function RegisterDogClient({
       </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col w-full gap-4 px-12 py-4"
+        className="flex flex-col gap-4 px-12 py-4 w-full"
       >
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col gap-4 items-center">
           <div className="relative w-24 h-24 group">
-            <div className="w-24 h-24 overflow-hidden rounded-full">
+            <div className="overflow-hidden w-24 h-24 rounded-full">
               <Image
                 src={previewUrl || emptyDogImage}
                 alt="dog profile"
@@ -107,7 +107,7 @@ export default function RegisterDogClient({
             </div>
             <label
               htmlFor="photo"
-              className="absolute inset-0 flex items-center justify-center invisible transition-all bg-black rounded-full opacity-0 cursor-pointer bg-opacity-40 group-hover:visible group-hover:opacity-100"
+              className="flex absolute inset-0 invisible justify-center items-center bg-black bg-opacity-40 rounded-full opacity-0 transition-all cursor-pointer group-hover:visible group-hover:opacity-100"
             >
               <span className="text-sm text-white">사진 변경</span>
             </label>
@@ -188,14 +188,14 @@ export default function RegisterDogClient({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="relative flex items-center justify-center m-auto w-fit"
+          className="flex relative justify-center items-center m-auto w-fit"
         >
           <Image
             src={dogFootIcon}
             alt="dog foot"
             width={56}
             height={56}
-            className="text-black w-14 h-14 hover:text-main-yellow"
+            className="w-14 h-14 text-black hover:text-main-yellow"
             aria-label="register dog"
           />
           <span className="absolute pt-4 text-sm text-white pointer-events-none">
