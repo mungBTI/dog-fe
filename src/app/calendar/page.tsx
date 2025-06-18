@@ -84,11 +84,7 @@ export default function Calendar() {
   }
 
   if (listIsLoading || questionIsLoading) {
-    return (
-      <div className={`${layout.flex.list.full} item-center justify-center`}>
-        <GeneralLoading />
-      </div>
-    );
+    return <GeneralLoading />;
   }
 
   const onClick = (answerId: string) => {
@@ -176,17 +172,20 @@ export default function Calendar() {
             </button>
           </div>
         </div>
-        <div className="w-[300px] md:w-[400px] h-5 text-left mt-4 text-lg font-semibold">
-          {selected?.toLocaleDateString()}
+        <div className="flex gap-2 w-[300px] md:w-[400px] h-5 text-left mt-4 text-lg font-semibold">
+          <div>{selected?.toLocaleDateString()}</div>
+          {questionData && (
+            <div
+              className="cursor-pointer"
+              onClick={() => onClick(questionData.id)}
+            >
+              {"\u{270F}\u{FE0F}"}
+            </div>
+          )}
         </div>
         <div className="w-[300px] md:w-[400px] h-12 text-left m-4 text-lg font-semibold">
           {questionData?.questionText ? (
-            <p
-              onClick={() => onClick(questionData.id)}
-              className="cursor-pointer hover:text-main-yellow"
-            >
-              {questionData?.questionText}
-            </p>
+            <p>{questionData?.questionText}</p>
           ) : (
             <p>기록하지 않은 날입니다.</p>
           )}

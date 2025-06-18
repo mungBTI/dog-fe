@@ -83,11 +83,7 @@ export default function New() {
   }
 
   if (todayIsLoading) {
-    return (
-      <div className={`${layout.flex.list.full} item-center justify-center`}>
-        <GeneralLoading />
-      </div>
-    );
+    return <GeneralLoading />;
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -106,11 +106,7 @@ export default function Edit({ params }: getAnswerId) {
   }
 
   if (getDetailLoading) {
-    return (
-      <div className={`${layout.flex.list.full} item-center justify-center`}>
-        <GeneralLoading />
-      </div>
-    );
+    return <GeneralLoading />;
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
