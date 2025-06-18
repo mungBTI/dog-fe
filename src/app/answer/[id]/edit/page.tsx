@@ -15,7 +15,7 @@ import {
 } from "@/types/answer";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getDetailAnswer } from "@/api/answer/getAnswer";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import GeneralLoading from "@/app/components/GeneralLoading";
 import Mood from "../../_components/Mood";
 import { uploadPhoto } from "@/api/answer/postAnswer";
@@ -39,6 +39,14 @@ export default function Edit({ params }: getAnswerId) {
   } = useForm<EditAnswerForm>();
 
   const currentMood = watch("mood");
+  const answerText = watch("answerText");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { ref: hookFormRef, ...rest } = register("answerText", {
+    required: {
+      value: true,
+      message: "답변을 작성해주세요.",
+    },
+  });
 
   const {
     data: getDetailData,
@@ -60,15 +68,24 @@ export default function Edit({ params }: getAnswerId) {
     }
   }, [getDetailData, reset]);
 
+  const adjustHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustHeight();
+  }, [answerText]);
+
   const uploadMutation = useMutation({
     mutationFn: uploadPhoto,
   });
 
   const patchMutation = useMutation({
     mutationFn: patchAnswer,
-    onSuccess: () => {
-      router.back();
-    },
     onError: (error: unknown) => {
       console.error(`오류: ${(error as Error).message}`);
     },
@@ -151,10 +168,6 @@ export default function Edit({ params }: getAnswerId) {
     patchMutation.mutate(submitData);
   };
 
-  const handleBack = () => {
-    router.back();
-  };
-
   const handleDelete = () => {
     if (confirm("정말로 답변을 삭제하시겠습니까?")) {
       deleteMutation.mutate({ answerId: answerId });
@@ -181,7 +194,6 @@ export default function Edit({ params }: getAnswerId) {
             <button type="submit" form="answer-form">
               수정
             </button>
-            <button onClick={handleBack}>취소</button>
             {!isToday && <button onClick={handleDelete}>삭제</button>}
           </div>
         </div>
@@ -193,19 +205,14 @@ export default function Edit({ params }: getAnswerId) {
           className="flex flex-col justify-start gap-2 w-full min-h-[300px] py-2"
         >
           <textarea
+            {...rest}
+            ref={(e) => {
+              hookFormRef(e);
+              textareaRef.current = e;
+            }}
             className="w-full bg-inherit resize-none overflow-hidden border-none outline-none"
             placeholder="답변 작성..."
-            {...register("answerText", {
-              required: {
-                value: true,
-                message: "답변을 작성해주세요.",
-              },
-            })}
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = "auto";
-              target.style.height = `${target.scrollHeight}px`;
-            }}
+            onInput={adjustHeight}
           />
           {errors.answerText && (
             <p className="text-main-yellow text-sm">

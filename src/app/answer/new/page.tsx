@@ -65,8 +65,9 @@ export default function New() {
 
   const postMutation = useMutation({
     mutationFn: postTodayAnswer,
-    onSuccess: () => {
-      router.push(`/main`);
+    onSuccess: (data) => {
+      const answerId = data.answer.id;
+      router.push(`${answerId}/edit`);
     },
     onError: (error: unknown) => {
       console.error(`오류: ${(error as Error).message}`);
@@ -132,10 +133,6 @@ export default function New() {
     postMutation.mutate(submitData);
   };
 
-  const handleBack = () => {
-    router.push(`/main`);
-  };
-
   return (
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
       <Mood mood={currentMood} onMoodSelect={handleMoodSelect} />
@@ -148,7 +145,6 @@ export default function New() {
           />
           <div className="flex items-center gap-3">
             <button form="answer-form">저장</button>
-            <button onClick={handleBack}>취소</button>
           </div>
         </div>
       </div>
