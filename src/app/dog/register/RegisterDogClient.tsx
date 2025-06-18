@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { textInput } from "@/styles/input";
-import dogFootIcon from "@/image/dog_foot.svg";
+import dogFootIcon from "../../../image/dog_foot.svg";
 import fillUserImage from "../../../../public/icons/fill-user.svg";
 import emptyDogImage from "../../../../public/icons/empty-dog.svg";
 import { postDogInfo } from "@/api/info/postInfo";
@@ -44,20 +44,28 @@ export default function RegisterDogClient({
 
   const onSubmit = async (data: DogInfo) => {
     try {
-      const formData = new FormData();
-      formData.append("file", data.profilePhotoUrl);
+      let profilePhotoId = null;
 
-      const hostedImage = await hostingImage(formData);
-      if (!hostedImage || !hostedImage.profilePhotoId) {
-        alert("사진 업로드에 실패했습니다.");
-        return;
+      // 사진이 File로 업로드된 경우에만 이미지 호스팅 진행
+      if (data.profilePhotoUrl && data.profilePhotoUrl instanceof File) {
+        const formData = new FormData();
+        formData.append("file", data.profilePhotoUrl);
+
+        const hostedImage = await hostingImage(formData);
+        if (!hostedImage || !hostedImage.profilePhotoId) {
+          alert("사진 업로드에 실패했습니다.");
+          return;
+        }
+        profilePhotoId = hostedImage.profilePhotoId;
       }
+
+      console.log(data, "data");
 
       const postData: PostDogInfo = {
         ...data,
         birthday: new Date(data.birthday),
         firstMetAt: new Date(data.firstMetAt),
-        profilePhotoId: hostedImage.profilePhotoId,
+        ...(profilePhotoId && { profilePhotoId }), // profilePhotoId가 있을 때만 포함
       };
 
       await postDogInfo(postData);

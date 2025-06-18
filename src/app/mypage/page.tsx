@@ -2,7 +2,6 @@
 import heart from "../../../public/icons/heart.png";
 import emptyDogImage from "../../../public/icons/empty-dog.svg";
 import fillUserImage from "../../../public/icons/fill-user.svg";
-import dogFootIcon from "@/image/dog_foot.svg";
 import { layout } from "@/styles/layout";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -18,6 +17,7 @@ import { editUserInfo, editDogInfo } from "@/api/info/postInfo";
 import GeneralLoading from "../components/GeneralLoading";
 import { hostingImage } from "@/api/common/common";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 interface ProfileForm {
   userInfo: UserInfo;
@@ -26,6 +26,7 @@ interface ProfileForm {
 
 function MyPageContent() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const {
     register,
@@ -85,20 +86,39 @@ function MyPageContent() {
   const onSubmit = useCallback(
     async (data: ProfileForm) => {
       try {
-        const formData = new FormData();
-        formData.append("file", data.userInfo.profilePhotoUrl);
-        const userHostedImage = await hostingImage(formData);
-        const userHostedImageId = userHostedImage.profilePhotoId;
+        let userHostedImageId = null;
+        let dogHostedImageId = null;
 
-        const dogFormData = new FormData();
-        dogFormData.append("file", data.dogInfo.profilePhotoUrl);
-        const dogHostedImage = await hostingImage(dogFormData);
-        const dogHostedImageId = dogHostedImage.profilePhotoId;
+        // 유저 이미지가 File로 업로드된 경우에만 호스팅
+        if (
+          data.userInfo.profilePhotoUrl &&
+          data.userInfo.profilePhotoUrl instanceof File
+        ) {
+          const formData = new FormData();
+          formData.append("file", data.userInfo.profilePhotoUrl);
+          const userHostedImage = await hostingImage(formData);
+          if (userHostedImage?.profilePhotoId) {
+            userHostedImageId = userHostedImage.profilePhotoId;
+          }
+        }
+
+        // 강아지 이미지가 File로 업로드된 경우에만 호스팅
+        if (
+          data.dogInfo.profilePhotoUrl &&
+          data.dogInfo.profilePhotoUrl instanceof File
+        ) {
+          const dogFormData = new FormData();
+          dogFormData.append("file", data.dogInfo.profilePhotoUrl);
+          const dogHostedImage = await hostingImage(dogFormData);
+          if (dogHostedImage?.profilePhotoId) {
+            dogHostedImageId = dogHostedImage.profilePhotoId;
+          }
+        }
 
         // 유저 정보 업데이트
         await editUser.mutateAsync({
           nickName: data.userInfo.nickName,
-          profilePhotoId: userHostedImageId,
+          ...(userHostedImageId && { profilePhotoId: userHostedImageId }),
         });
 
         // 강아지 정보 업데이트
@@ -106,7 +126,7 @@ function MyPageContent() {
           name: data.dogInfo.name,
           birthday: new Date(data.dogInfo.birthday),
           firstMetAt: new Date(data.dogInfo.firstMetAt),
-          profilePhotoId: dogHostedImageId,
+          ...(dogHostedImageId && { profilePhotoId: dogHostedImageId }),
         });
 
         alert("저장되었습니다!");
@@ -140,6 +160,12 @@ function MyPageContent() {
     key: string,
     value: MenuItem | MenuItemWithFields
   ) => {
+    if (key === "logout") {
+      localStorage.removeItem("accessToken");
+      router.push("/login");
+      return;
+    }
+
     if (hasFields(value)) {
       toggleSection(key);
     }
@@ -323,20 +349,24 @@ function MyPageContent() {
       </div>
       <button
         type="submit"
-        className="relative mx-auto transition-transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 w-fit"
+        className="relative px-8 py-2 mx-auto overflow-hidden text-lg font-bold text-white transition-all duration-300 transform border-2 border-yellow-300 rounded-full shadow-lg group bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-400 hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-500 hover:shadow-xl hover:scale-105 hover:border-yellow-400 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
+        style={{
+          background:
+            "linear-gradient(135deg, #FFC940 0%, #FFD700 50%, #FFA500 100%)",
+        }}
         disabled={isSubmitting}
       >
-        <Image
-          src={dogFootIcon}
-          alt="dog foot"
-          width={56}
-          height={56}
-          className="text-black w-14 h-14 hover:text-main-yellow"
-          aria-label="register dog"
-        />
-        <span className="absolute font-medium text-white -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent justify-center via-white to-transparent opacity-20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+
+        <span className="relative z-10 tracking-wider">
           {isSubmitting ? "저장 중..." : "저장"}
         </span>
+
+        {isSubmitting && (
+          <div className="absolute transition-transform duration-300 transform -translate-y-1/2 right-3 top-1/2 group-hover:scale-110">
+            <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
+          </div>
+        )}
       </button>
     </form>
   );
