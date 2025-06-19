@@ -5,9 +5,9 @@ import Introduce from "./_components/Introduce";
 import Kakao from "./_components/Kakao";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
-export default function Login() {
+function LoginContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -34,5 +34,12 @@ export default function Login() {
         <Kakao />
       </div>
     </div>
+  );
+}
+export default function Login() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
