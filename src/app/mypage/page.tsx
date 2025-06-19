@@ -132,7 +132,7 @@ function MyPageContent() {
         alert("저장 중 오류가 발생했습니다.");
       }
     },
-    [editUser, editDog]
+    [editUser, editDog, router]
   );
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
