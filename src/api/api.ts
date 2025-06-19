@@ -20,8 +20,7 @@ instance.interceptors.response.use(
     if (error.response?.status === 401 && !isHandlingUnauthorized) {
       isHandlingUnauthorized = true;
       localStorage.removeItem("accessToken");
-      alert("다시 로그인 해주세요.");
-      window.location.href = "/login";
+      window.location.href = "/login?error=true";
     }
     return Promise.reject(error);
   }

@@ -13,7 +13,7 @@ import {
   getAnswerId,
   UploadedPhoto,
 } from "@/types/answer";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getDetailAnswer } from "@/api/answer/getAnswer";
 import { use, useEffect, useRef, useState } from "react";
 import GeneralLoading from "@/app/components/GeneralLoading";
@@ -21,13 +21,18 @@ import Mood from "../../_components/Mood";
 import { uploadPhoto } from "@/api/answer/postAnswer";
 import { patchAnswer } from "@/api/answer/patchAnswer";
 import { deleteAnswer } from "@/api/answer/deleteAnswer";
+import toast from "react-hot-toast";
+import DeleteConfirmModal from "../../_components/DeleteConfirmModal";
 
 export default function Edit({ params }: getAnswerId) {
   const answerId = use(params).id;
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [previewImage, setPreviewImage] = useState<string[] | null>();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const {
     register,
@@ -86,6 +91,14 @@ export default function Edit({ params }: getAnswerId) {
 
   const patchMutation = useMutation({
     mutationFn: patchAnswer,
+    onSuccess: () => {
+      toast.success("답변이 수정되었습니다.");
+      queryClient.invalidateQueries({
+        queryKey: ["getDetailAnswer", answerId],
+      });
+      setSelectedFiles([]);
+      setPreviewImage(null);
+    },
     onError: (error: unknown) => {
       console.error(`오류: ${(error as Error).message}`);
     },
@@ -94,6 +107,7 @@ export default function Edit({ params }: getAnswerId) {
   const deleteMutation = useMutation({
     mutationFn: deleteAnswer,
     onSuccess: () => {
+      toast.success("답변이 삭제되었습니다.");
       router.back();
     },
     onError: (error: unknown) => {
@@ -149,7 +163,9 @@ export default function Edit({ params }: getAnswerId) {
       getDetailData?.answer.mood === data.mood &&
       photoIds.length === 0
     ) {
-      alert("변경된 내용이 없습니다.");
+      toast.error("변경된 내용이 없습니다.", {
+        icon: "⚠️",
+      });
       return;
     }
 
@@ -165,9 +181,7 @@ export default function Edit({ params }: getAnswerId) {
   };
 
   const handleDelete = () => {
-    if (confirm("정말로 답변을 삭제하시겠습니까?")) {
-      deleteMutation.mutate({ answerId: answerId });
-    }
+    deleteMutation.mutate({ answerId: answerId });
   };
 
   const today = new Date();
@@ -190,7 +204,16 @@ export default function Edit({ params }: getAnswerId) {
             <button type="submit" form="answer-form">
               수정
             </button>
-            {!isToday && <button onClick={handleDelete}>삭제</button>}
+            {!isToday && (
+              <>
+                <button onClick={() => setIsDeleteModalOpen(true)}>삭제</button>
+                <DeleteConfirmModal
+                  isOpen={isDeleteModalOpen}
+                  onClose={() => setIsDeleteModalOpen(false)}
+                  onConfirm={handleDelete}
+                />
+              </>
+            )}
           </div>
         </div>
       </div>

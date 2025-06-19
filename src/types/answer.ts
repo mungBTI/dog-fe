@@ -87,3 +87,9 @@ export type getAnswerDetailResponse = {
   message: string;
   answer: getAnswerDetail;
 };
+
+export type DeleteConfirm = {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+};
