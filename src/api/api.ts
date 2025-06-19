@@ -12,10 +12,13 @@ instance.interceptors.request.use((config) => {
   return config;
 });
 
+let isHandlingUnauthorized = false;
+
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !isHandlingUnauthorized) {
+      isHandlingUnauthorized = true;
       localStorage.removeItem("accessToken");
       alert("다시 로그인 해주세요.");
       window.location.href = "/login";
