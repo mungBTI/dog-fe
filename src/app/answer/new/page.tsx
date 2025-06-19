@@ -18,6 +18,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import GeneralLoading from "@/app/components/GeneralLoading";
 import { postTodayAnswer, uploadPhoto } from "@/api/answer/postAnswer";
 import Mood from "../_components/Mood";
+import toast from "react-hot-toast";
 
 export default function New() {
   const router = useRouter();
@@ -66,6 +67,7 @@ export default function New() {
   const postMutation = useMutation({
     mutationFn: postTodayAnswer,
     onSuccess: (data) => {
+      toast.success("답변이 저장되었습니다.");
       const answerId = data.answer.id;
       router.push(`${answerId}/edit`);
     },
