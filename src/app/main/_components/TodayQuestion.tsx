@@ -2,7 +2,6 @@ import { getTodayAnswer } from "@/api/answer/getAnswer";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import Image from "next/image";
-import dogFoot from "../../../image/dog_foot.svg";
 import { useRouter } from "next/navigation";
 export default function TodayQuestion() {
   const router = useRouter();
@@ -67,7 +66,7 @@ export default function TodayQuestion() {
       >
         <div className="absolute transform -translate-x-1/2 -top-4 left-1/2">
           <Image
-            src={dogFoot}
+            src="/icons/dog_foot.svg"
             alt="강아지 발바닥"
             width={32}
             height={32}
@@ -94,7 +93,7 @@ export default function TodayQuestion() {
 
             <div className="absolute transform -translate-y-1/2 left-3 top-1/2">
               <Image
-                src={dogFoot}
+                src="/icons/dog_foot.svg"
                 alt=""
                 width={20}
                 height={20}
