@@ -2,9 +2,6 @@
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { textInput } from "@/styles/input";
-import dogFootIcon from "../../../image/dog_foot.svg";
-import fillUserImage from "../../../../public/icons/fill-user.svg";
-import emptyDogImage from "../../../../public/icons/empty-dog.svg";
 import { postDogInfo } from "@/api/info/postInfo";
 import { DogInfo, PostDogInfo } from "@/types/mainInfo";
 import { useRouter } from "next/navigation";
@@ -32,7 +29,7 @@ export default function RegisterDogClient({
       birthday: new Date(new Date().setMonth(new Date().getMonth() - 3, 1))
         .toISOString()
         .split("T")[0],
-      profilePhotoUrl: emptyDogImage.src,
+      profilePhotoUrl: "/icons/empty-dog.svg",
     },
     mode: "onChange",
   });
@@ -40,7 +37,9 @@ export default function RegisterDogClient({
   const birthday = watch("birthday");
   const photo = watch("profilePhotoUrl") as File | string;
   const previewUrl =
-    photo instanceof File ? URL.createObjectURL(photo) : photo || emptyDogImage;
+    photo instanceof File
+      ? URL.createObjectURL(photo)
+      : photo || "/icons/empty-dog.svg";
 
   const onSubmit = async (data: DogInfo) => {
     try {
@@ -81,7 +80,7 @@ export default function RegisterDogClient({
       <div className="flex flex-row items-center justify-center gap-2">
         <div className="overflow-hidden rounded-full w-9 h-9">
           <Image
-            src={userPhoto || fillUserImage}
+            src={userPhoto || "/icons/fill-user.svg"}
             alt="user profile"
             width={70}
             height={70}
@@ -98,7 +97,7 @@ export default function RegisterDogClient({
           <div className="relative w-24 h-24 group">
             <div className="w-24 h-24 overflow-hidden rounded-full">
               <Image
-                src={previewUrl || emptyDogImage}
+                src={previewUrl || "/icons/empty-dog.svg"}
                 alt="dog profile"
                 width={100}
                 height={100}
@@ -191,7 +190,7 @@ export default function RegisterDogClient({
           className="relative flex items-center justify-center m-auto w-fit"
         >
           <Image
-            src={dogFootIcon}
+            src="/icons/dog_foot.svg"
             alt="dog foot"
             width={56}
             height={56}

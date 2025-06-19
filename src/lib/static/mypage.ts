@@ -1,13 +1,10 @@
-import UserImg from "../../../public/icons/person.png";
-import DogImg from "../../../public/icons/dogIcon.png";
 // import QaImg from "../../../public/icons/question.png";
-import LogoutImg from "../../../public/icons/sign-out.png";
 // import DeleteImg from "../../../public/icons/trash.png";
 
 export const mypageList = {
   userInfo: {
     label: "보호자 정보",
-    icon: UserImg,
+    icon: "/icons/person.png",
     fields: [
       {
         label: "이메일",
@@ -19,7 +16,7 @@ export const mypageList = {
   },
   dogInfo: {
     label: "반려동물 정보",
-    icon: DogImg,
+    icon: "/icons/dogIcon.png",
     fields: [
       {
         label: "이름",
@@ -34,7 +31,7 @@ export const mypageList = {
   },
   logout: {
     label: "로그아웃",
-    icon: LogoutImg,
+    icon: "/icons/sign-out.png",
   },
   // deleteAccount: {
   //   label: "회원탈퇴",

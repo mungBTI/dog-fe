@@ -1,11 +1,10 @@
 import Image from "next/image";
-import dog from "../../../../public/image/dog_illus/main_dog.png";
 
 export default function Dog() {
   return (
     <div>
       <Image
-        src={dog}
+        src="/image/dog_illus/main_dog.png"
         alt="dog"
         width={300}
         height={300}

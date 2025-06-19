@@ -1,7 +1,4 @@
 "use client";
-import heart from "../../../public/icons/heart.png";
-import emptyDogImage from "../../../public/icons/empty-dog.svg";
-import fillUserImage from "../../../public/icons/fill-user.svg";
 import { layout } from "@/styles/layout";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -63,11 +60,11 @@ function MyPageContent() {
       reset({
         userInfo: {
           ...userInfo,
-          profilePhotoUrl: userInfo.profilePhotoUrl || fillUserImage.src,
+          profilePhotoUrl: userInfo.profilePhotoUrl || "/icons/fill-user.svg",
         },
         dogInfo: {
           ...dogInfo,
-          photo: dogInfo.profilePhotoUrl || emptyDogImage.src,
+          photo: dogInfo.profilePhotoUrl || "/icons/empty-dog.svg",
         },
       });
     }
@@ -178,7 +175,7 @@ function MyPageContent() {
   const dogPhotoPreview =
     dogPhoto instanceof File
       ? URL.createObjectURL(dogPhoto)
-      : dogPhoto || emptyDogImage.src;
+      : dogPhoto || "/icons/empty-dog.svg";
 
   const userPhoto = watch("userInfo.profilePhotoUrl") as
     | File
@@ -187,7 +184,7 @@ function MyPageContent() {
   const userPhotoPreview =
     userPhoto instanceof File
       ? URL.createObjectURL(userPhoto)
-      : userPhoto || fillUserImage.src;
+      : userPhoto || "/icons/fill-user.svg";
 
   if (userLoading || dogLoading) return <GeneralLoading />;
   if (userError || dogError) return <div>오류가 발생했습니다.</div>;
@@ -228,7 +225,7 @@ function MyPageContent() {
               }}
             />
           </div>
-          <Image src={heart} alt="heart" width={20} height={20} />
+          <Image src="/icons/heart.png" alt="heart" width={20} height={20} />
           <div className="relative w-16 h-16 group md:w-24 md:h-24">
             <div className="w-16 h-16 overflow-hidden rounded-full md:w-24 md:h-24">
               <Image

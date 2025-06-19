@@ -1,7 +1,5 @@
 import Image from "next/image";
-import heart from "../../../../public/icons/heart.png";
 import { SimpleUserInfo, SimpleDogInfo } from "@/types/mainInfo";
-import emptyDogImage from "../../../../public/icons/empty-dog.svg";
 import { layout } from "@/styles/layout";
 export default function UserInfoBox({
   userInfo,
@@ -11,7 +9,7 @@ export default function UserInfoBox({
   dogInfo: SimpleDogInfo;
 }) {
   if (!dogInfo.profilePhotoUrl) {
-    dogInfo.profilePhotoUrl = emptyDogImage.src;
+    dogInfo.profilePhotoUrl = "/icons/empty-dog.svg";
   }
   return (
     <div
@@ -29,7 +27,7 @@ export default function UserInfoBox({
         </div>
 
         <span className="text-lg font-bold">{userInfo.nickName}</span>
-        <Image src={heart} alt="heart" width={20} height={20} />
+        <Image src="/icons/heart.png" alt="heart" width={20} height={20} />
         <div className="w-[30px] h-[30px] rounded-full overflow-hidden">
           <Image
             src={dogInfo.profilePhotoUrl}
