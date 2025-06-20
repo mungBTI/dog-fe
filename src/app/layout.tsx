@@ -5,8 +5,11 @@ import Providers from "./Providers";
 import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
-  title: "두둥명",
+  title: "두둥멍",
   description: "반려동물과의 행복 저장소",
+  verification: {
+    google: "NZafkVmeiqnVqn-btqNK6Eyt7XwNpNGz6OKMO1RAM2o",
+  },
 };
 
 export default function RootLayout({
