@@ -27,18 +27,18 @@ export default function Mood({ mood, onMoodSelect }: MoodSelect) {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-start p-2 mt-5 mb-1 text-xl relative">
+    <div className="w-full flex flex-col items-center justify-start p-2 mt-5 mb-1 text-2xl relative">
       <span onClick={handleEmojiClick} className="cursor-pointer">
         {emoji}
       </span>
 
       {showSelect && (
-        <div className="absolute left-1/2 -translate-x-1/2 mt-7 z-10 bg-white rounded shadow-lg p-2">
-          <div className="flex items-center justify-center gap-2">
+        <div className="absolute left-1/2 -translate-x-1/2 mt-9 z-10 bg-white rounded shadow-lg p-2">
+          <div className="flex items-center justify-center gap-3">
             {Object.keys(moodToUnicode).map((moodKey) => (
               <button
                 key={moodKey}
-                className="cursor-pointer text-2xl"
+                className="cursor-pointer text-3xl"
                 onClick={() => handleMoodSelect(moodKey)}
               >
                 {moodToUnicode[moodKey]}

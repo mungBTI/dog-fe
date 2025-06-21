@@ -57,6 +57,7 @@ export default function New() {
   }, [todayData, reset]);
 
   const [previewImage, setPreviewImage] = useState<string[] | null>(null);
+  const [previewSize, setPreviewSize] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const today = new Date();
@@ -95,13 +96,34 @@ export default function New() {
     }
     const fileArray = Array.from(files);
     if (fileArray.length > 1) {
-      alert("사진 선택은 1장만 가능합니다.");
+      toast.error("사진 선택은 1장만 가능합니다.", {
+        icon: "⚠️",
+      });
       e.target.value = "";
       return;
     }
-    const previewUrls = URL.createObjectURL(fileArray[0]);
+
+    const file = fileArray[0];
+
+    const maxSizeInMB = 10;
+    const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+    const currentSizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+
+    if (file.size > maxSizeInBytes) {
+      toast.error(
+        `현재 사진 크기는 ${currentSizeInMB}MB입니다. ${maxSizeInMB}MB 이하로 선택해주세요.`,
+        {
+          icon: "⚠️",
+        }
+      );
+      e.target.value = "";
+      return;
+    }
+
+    const previewUrls = URL.createObjectURL(file);
     setPreviewImage([previewUrls]);
     setSelectedFiles(fileArray);
+    setPreviewSize(currentSizeInMB);
   };
 
   const handleMoodSelect = (mood: string) => {
@@ -185,7 +207,10 @@ export default function New() {
                 <ImagePreview previewImage={todayData.answer.photoUrls[0]} />
               )}
               {previewImage && previewImage[0] && (
-                <ImagePreview previewImage={previewImage[0]} />
+                <ImagePreview
+                  previewImage={previewImage[0]}
+                  previewSize={previewSize}
+                />
               )}
             </div>
             <label

@@ -151,9 +151,10 @@ export default function Calendar() {
             },
           }}
           classNames={{
-            root: ` w-[300px] md:w-[400px] h-[400px] shadow-lg p-6 bg-white rounded-lg`,
+            root: `w-[300px] md:w-[400px] h-[400px] shadow-lg p-6 bg-white rounded-lg`,
+            months: `w-full h-full`,
             caption_label: `hidden`,
-            dropdowns: `flex flex-row-reverse gap-2 h-8 font-semibold`,
+            dropdowns: `flex flex-row-reverse gap-2 h-8 font-semibold mb-3`,
             years_dropdown: `text-center`,
             months_dropdown: `text-center`,
             month_grid: `w-full grid-cols-7`,

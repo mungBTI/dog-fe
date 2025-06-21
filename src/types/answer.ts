@@ -63,7 +63,8 @@ export type Info = {
 };
 
 export type ImagePreviewControl = {
-  previewImage: string | undefined;
+  previewImage: string | null;
+  previewSize?: string | null;
 };
 
 export type getAnswerDetail = {
