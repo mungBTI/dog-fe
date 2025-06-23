@@ -30,7 +30,7 @@ export default function TodayQuestion() {
           return "답변하러 가기";
         });
         setLink(() => {
-          return `/answer/${questionData.answerId}/new`;
+          return `/answer/new`;
         });
         returnObj.answerId = questionData.answer.id;
       } else if (!questionData.answer.isDraft) {
@@ -38,7 +38,7 @@ export default function TodayQuestion() {
         setLinkText("답변 수정하러 가기");
 
         setLink(() => {
-          return `/answer/new`;
+          return `/answer/${questionData.answer.id}/edit`;
         });
       }
     }
