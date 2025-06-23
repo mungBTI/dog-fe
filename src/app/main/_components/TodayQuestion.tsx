@@ -33,7 +33,7 @@ export default function TodayQuestion() {
           return `/answer/${questionData.answerId}/new`;
         });
         returnObj.answerId = questionData.answer.id;
-      } else if (questionData.answer.isDraft) {
+      } else if (!questionData.answer.isDraft) {
         returnObj.title = "🐶 오늘의 사랑을 전했어요! ✨";
         setLinkText("답변 수정하러 가기");
 
