@@ -38,7 +38,7 @@ export default function TodayQuestion() {
         setLinkText("답변 수정하러 가기");
 
         setLink(() => {
-          return `/answer/${questionData.answer.id}/edit`;
+          return `/answer/new`;
         });
       }
     }
@@ -61,10 +61,10 @@ export default function TodayQuestion() {
       </div>
 
       <div
-        className="relative p-8 bg-white shadow-xl rounded-3xl"
+        className="relative p-8 bg-white rounded-3xl shadow-xl"
         style={{ borderColor: "#FFC940", borderWidth: "1px" }}
       >
-        <div className="absolute transform -translate-x-1/2 -top-4 left-1/2">
+        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
           <Image
             src="/icons/dog_foot.svg"
             alt="강아지 발바닥"
@@ -80,7 +80,7 @@ export default function TodayQuestion() {
           </p>
 
           <button
-            className="relative px-8 py-2 overflow-hidden text-lg font-bold text-white transition-all duration-300 transform border-2 border-yellow-300 rounded-full shadow-lg group bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-400 hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-500 hover:shadow-xl hover:scale-105 hover:border-yellow-400"
+            className="overflow-hidden relative px-8 py-2 text-lg font-bold text-white bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-400 rounded-full border-2 border-yellow-300 shadow-lg transition-all duration-300 transform group hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-500 hover:shadow-xl hover:scale-105 hover:border-yellow-400"
             style={{
               background:
                 "linear-gradient(135deg, #FFC940 0%, #FFD700 50%, #FFA500 100%)",
@@ -91,7 +91,7 @@ export default function TodayQuestion() {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
 
-            <div className="absolute transform -translate-y-1/2 left-3 top-1/2">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
               <Image
                 src="/icons/dog_foot.svg"
                 alt=""
@@ -104,7 +104,7 @@ export default function TodayQuestion() {
 
             <span className="relative z-10 tracking-wider">{linkText}</span>
 
-            <div className="absolute transition-transform duration-300 transform -translate-y-1/2 right-3 top-1/2 group-hover:translate-x-1">
+            <div className="absolute right-3 top-1/2 transition-transform duration-300 transform -translate-y-1/2 group-hover:translate-x-1">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M5 12H19M19 12L12 5M19 12L12 19"
@@ -116,7 +116,7 @@ export default function TodayQuestion() {
               </svg>
             </div>
 
-            <div className="absolute w-3/4 h-1 transform -translate-x-1/2 bg-yellow-400 rounded-full opacity-50 -bottom-1 left-1/2 blur-sm"></div>
+            <div className="absolute -bottom-1 left-1/2 w-3/4 h-1 bg-yellow-400 rounded-full opacity-50 blur-sm transform -translate-x-1/2"></div>
           </button>
         </div>
       </div>

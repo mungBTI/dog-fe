@@ -91,6 +91,13 @@ function MyPageContent() {
           data.userInfo.profilePhotoUrl &&
           data.userInfo.profilePhotoUrl instanceof File
         ) {
+          const maxSize = 5 * 1024 * 1024; // 5MB
+
+          if (data.userInfo.profilePhotoUrl.size > maxSize) {
+            alert("유저 프로필 사진의 크기는 5MB 이하여야 합니다.");
+            return;
+          }
+
           const formData = new FormData();
           formData.append("file", data.userInfo.profilePhotoUrl);
           const userHostedImage = await hostingImage(formData);
@@ -104,6 +111,13 @@ function MyPageContent() {
           data.dogInfo.profilePhotoUrl &&
           data.dogInfo.profilePhotoUrl instanceof File
         ) {
+          const maxSize = 5 * 1024 * 1024; // 5MB
+
+          if (data.dogInfo.profilePhotoUrl.size > maxSize) {
+            alert("강아지 프로필 사진의 크기는 5MB 이하여야 합니다.");
+            return;
+          }
+
           const dogFormData = new FormData();
           dogFormData.append("file", data.dogInfo.profilePhotoUrl);
           const dogHostedImage = await hostingImage(dogFormData);
@@ -192,12 +206,12 @@ function MyPageContent() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col justify-start w-full h-full overflow-hidden"
+      className="flex overflow-hidden flex-col justify-start w-full h-full"
     >
       <div className={`${layout.flex.column.center} py-2 md:py-8`}>
         <div className={`${layout.flex.row.center} gap-6 py-2 md:gap-8`}>
           <div className="relative w-16 h-16 group md:w-24 md:h-24">
-            <div className="w-16 h-16 overflow-hidden rounded-full md:w-24 md:h-24">
+            <div className="overflow-hidden w-16 h-16 rounded-full md:w-24 md:h-24">
               <Image
                 src={userPhotoPreview}
                 alt="user"
@@ -208,7 +222,7 @@ function MyPageContent() {
             </div>
             <label
               htmlFor="userPhoto"
-              className="absolute inset-0 flex items-center justify-center invisible transition-all bg-black rounded-full opacity-0 cursor-pointer bg-opacity-40 group-hover:visible group-hover:opacity-100"
+              className="flex absolute inset-0 invisible justify-center items-center bg-black bg-opacity-40 rounded-full opacity-0 transition-all cursor-pointer group-hover:visible group-hover:opacity-100"
             >
               <span className="text-sm text-white">사진 변경</span>
             </label>
@@ -220,14 +234,23 @@ function MyPageContent() {
               className="hidden"
               onChange={(e) => {
                 if (e.target.files?.[0]) {
-                  setValue("userInfo.profilePhotoUrl", e.target.files[0]);
+                  const file = e.target.files[0];
+                  const maxSize = 5 * 1024 * 1024; // 5MB
+
+                  if (file.size > maxSize) {
+                    alert("파일 크기는 5MB 이하여야 합니다.");
+                    e.target.value = ""; // 파일 입력 초기화
+                    return;
+                  }
+
+                  setValue("userInfo.profilePhotoUrl", file);
                 }
               }}
             />
           </div>
           <Image src="/icons/heart.png" alt="heart" width={20} height={20} />
           <div className="relative w-16 h-16 group md:w-24 md:h-24">
-            <div className="w-16 h-16 overflow-hidden rounded-full md:w-24 md:h-24">
+            <div className="overflow-hidden w-16 h-16 rounded-full md:w-24 md:h-24">
               <Image
                 src={dogPhotoPreview}
                 alt="dog"
@@ -238,7 +261,7 @@ function MyPageContent() {
             </div>
             <label
               htmlFor="dogPhoto"
-              className="absolute inset-0 flex items-center justify-center invisible transition-all bg-black rounded-full opacity-0 cursor-pointer bg-opacity-40 group-hover:visible group-hover:opacity-100"
+              className="flex absolute inset-0 invisible justify-center items-center bg-black bg-opacity-40 rounded-full opacity-0 transition-all cursor-pointer group-hover:visible group-hover:opacity-100"
             >
               <span className="text-sm text-white">사진 변경</span>
             </label>
@@ -250,7 +273,16 @@ function MyPageContent() {
               {...register("dogInfo.profilePhotoUrl")}
               onChange={(e) => {
                 if (e.target.files?.[0]) {
-                  setValue("dogInfo.profilePhotoUrl", e.target.files[0]);
+                  const file = e.target.files[0];
+                  const maxSize = 5 * 1024 * 1024; // 5MB
+
+                  if (file.size > maxSize) {
+                    alert("파일 크기는 5MB 이하여야 합니다.");
+                    e.target.value = ""; // 파일 입력 초기화
+                    return;
+                  }
+
+                  setValue("dogInfo.profilePhotoUrl", file);
                 }
               }}
             />
@@ -261,15 +293,15 @@ function MyPageContent() {
           <span className="text-lg font-bold">{dogInfo.togetherFor}일째</span>
         </span>
       </div>
-      <div className="w-full px-4 overflow-y-auto">
+      <div className="overflow-y-auto px-4 w-full">
         {Object.entries(mypageList).map(([key, value]) => (
           <div key={key}>
             <button
               type="button"
               onClick={() => handleMenuClick(key, value)}
-              className="flex items-center justify-between w-full py-2"
+              className="flex justify-between items-center py-2 w-full"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex gap-3 items-center">
                 <Image src={value.icon} alt={key} width={24} height={24} />
                 <span className="text-lg font-medium">{value.label}</span>
               </div>
@@ -293,7 +325,7 @@ function MyPageContent() {
             </button>
 
             {hasFields(value) && openSections[key] && (
-              <div className="pb-4 space-y-3 pl-11">
+              <div className="pb-4 pl-11 space-y-3">
                 {value.fields.map((field, index) => (
                   <div
                     key={index}
@@ -346,7 +378,7 @@ function MyPageContent() {
       </div>
       <button
         type="submit"
-        className="relative px-8 py-2 mx-auto overflow-hidden text-lg font-bold text-white transition-all duration-300 transform border-2 border-yellow-300 rounded-full shadow-lg group bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-400 hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-500 hover:shadow-xl hover:scale-105 hover:border-yellow-400 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
+        className="overflow-hidden relative px-8 py-2 mx-auto text-lg font-bold text-white bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-400 rounded-full border-2 border-yellow-300 shadow-lg transition-all duration-300 transform group hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-500 hover:shadow-xl hover:scale-105 hover:border-yellow-400 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
         style={{
           background:
             "linear-gradient(135deg, #FFC940 0%, #FFD700 50%, #FFA500 100%)",
@@ -360,8 +392,8 @@ function MyPageContent() {
         </span>
 
         {isSubmitting && (
-          <div className="absolute transition-transform duration-300 transform -translate-y-1/2 right-3 top-1/2 group-hover:scale-110">
-            <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
+          <div className="absolute right-3 top-1/2 transition-transform duration-300 transform -translate-y-1/2 group-hover:scale-110">
+            <div className="w-5 h-5 rounded-full border-2 border-white animate-spin border-t-transparent"></div>
           </div>
         )}
       </button>
