@@ -22,7 +22,7 @@ export default function TodayQuestion() {
       answerId: "",
     };
     if (questionData) {
-      if (questionData.status === 0 && !questionData.answer.isDraft) {
+      if (questionData.status === 0 && questionData.answer.isDraft) {
         returnObj.question = questionData.question.text;
         returnObj.title = "오늘의 질문이 찾아왔어요!";
 
