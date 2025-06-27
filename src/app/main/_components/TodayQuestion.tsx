@@ -1,9 +1,14 @@
 import { getTodayAnswer } from "@/api/answer/getAnswer";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-export default function TodayQuestion() {
+
+export default function TodayQuestion({
+  setIsDraft,
+}: {
+  setIsDraft: (isDraft: boolean) => void;
+}) {
   const router = useRouter();
   const [linkText, setLinkText] = useState<string>("답변하러 가기");
   const [link, setLink] = useState<string>("");
@@ -25,106 +30,63 @@ export default function TodayQuestion() {
       if (questionData.status === 0 && questionData.answer.isDraft) {
         returnObj.question = questionData.question.text;
         returnObj.title = "오늘의 질문이 찾아왔어요!";
-
-        setLinkText(() => {
-          return "답변하러 가기";
-        });
-        setLink(() => {
-          return `/answer/new`;
-        });
         returnObj.answerId = questionData.answer.id;
       } else if (!questionData.answer.isDraft) {
         returnObj.title = "🐶 오늘의 사랑을 전했어요! ✨";
-        setLinkText("답변 수정하러 가기");
-
-        setLink(() => {
-          return `/answer/${questionData.answer.id}/edit`;
-        });
       }
     }
     return returnObj;
   }, [questionData]);
 
+  useEffect(() => {
+    if (questionData) {
+      if (questionData.status === 0 && questionData.answer.isDraft) {
+        setIsDraft(true);
+        setLinkText("답변하러 가기");
+        setLink("/answer/new");
+      } else if (!questionData.answer.isDraft) {
+        setIsDraft(false);
+        setLinkText("답변 수정하러 가기");
+        setLink(`/answer/${questionData.answer.id}/edit`);
+      }
+    }
+  }, [questionData, setIsDraft]);
+
   const gotoEditPage = useCallback(() => {
     router.push(link);
-  }, [link]);
+  }, [link, router]);
 
   return (
-    <div className="relative p-6 mx-4">
-      <div className="mb-6 text-center">
+    <div className="relative w-full p-6 mx-4">
+      <div className="w-full p-4 mb-6 text-center bg-yellow-50 rounded-3xl">
         <h2
-          className="text-lg font-bold leading-relaxed"
-          style={{ color: "#FFC940" }}
+          className="mb-3 text-2xl font-bold leading-relaxed"
+          style={{ color: "#F5BC25" }}
         >
           {todayQuestion.title}
         </h2>
-      </div>
-
-      <div
-        className="relative p-8 bg-white rounded-3xl shadow-xl"
-        style={{ borderColor: "#FFC940", borderWidth: "1px" }}
-      >
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-          <Image
-            src="/icons/dog_foot.svg"
-            alt="강아지 발바닥"
-            width={32}
-            height={32}
-            style={{ filter: "brightness(0) saturate(100%)", color: "#FFC940" }}
-          />
-        </div>
-
-        <div className="text-center">
-          <p className="mb-6 text-lg font-medium leading-relaxed text-gray-800">
-            {todayQuestion.question}
-          </p>
-
-          <button
-            className="overflow-hidden relative px-8 py-2 text-lg font-bold text-white bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-400 rounded-full border-2 border-yellow-300 shadow-lg transition-all duration-300 transform group hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-500 hover:shadow-xl hover:scale-105 hover:border-yellow-400"
-            style={{
-              background:
-                "linear-gradient(135deg, #FFC940 0%, #FFD700 50%, #FFA500 100%)",
-            }}
-            onClick={() => {
-              gotoEditPage();
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-              <Image
-                src="/icons/dog_foot.svg"
-                alt=""
-                width={20}
-                height={20}
-                className="opacity-60"
-                style={{ filter: "brightness(0) invert(1)" }}
-              />
-            </div>
-
-            <span className="relative z-10 tracking-wider">{linkText}</span>
-
-            <div className="absolute right-3 top-1/2 transition-transform duration-300 transform -translate-y-1/2 group-hover:translate-x-1">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M5 12H19M19 12L12 5M19 12L12 19"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-
-            <div className="absolute -bottom-1 left-1/2 w-3/4 h-1 bg-yellow-400 rounded-full opacity-50 blur-sm transform -translate-x-1/2"></div>
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-6 text-center">
-        <p className="font-medium text-m" style={{ color: "#FFC940" }}>
-          오늘도 우리 강아지와 행복한 하루 보내세요! ⭐
+        <p className="p-4 mb-3 text-lg font-medium leading-relaxed text-gray-800 bg-white/80 rounded-3xl">
+          {todayQuestion.question}
         </p>
+      </div>
+      <div className="flex justify-center">
+        <button
+          className="flex items-center gap-2 px-4 py-2 text-lg font-extrabold text-white transition-all duration-300 transform w-fit bg-main-yellow rounded-2xl hover:bg-yellow-500 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
+          onClick={() => {
+            gotoEditPage();
+          }}
+        >
+          <span className="relative z-10 tracking-wider transition-all duration-300">
+            {linkText}
+          </span>
+          <Image
+            src="/icons/dog_foot_white.png"
+            alt="arrow-right"
+            width={20}
+            height={20}
+            className="transition-transform duration-300 group-hover:translate-x-1"
+          />
+        </button>
       </div>
     </div>
   );

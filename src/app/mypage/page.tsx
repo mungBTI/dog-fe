@@ -206,12 +206,12 @@ function MyPageContent() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex overflow-hidden flex-col justify-start w-full h-full"
+      className="flex flex-col justify-start w-full h-full overflow-hidden"
     >
       <div className={`${layout.flex.column.center} py-2 md:py-8`}>
         <div className={`${layout.flex.row.center} gap-6 py-2 md:gap-8`}>
           <div className="relative w-16 h-16 group md:w-24 md:h-24">
-            <div className="overflow-hidden w-16 h-16 rounded-full md:w-24 md:h-24">
+            <div className="w-16 h-16 overflow-hidden rounded-full md:w-24 md:h-24">
               <Image
                 src={userPhotoPreview}
                 alt="user"
@@ -222,7 +222,7 @@ function MyPageContent() {
             </div>
             <label
               htmlFor="userPhoto"
-              className="flex absolute inset-0 invisible justify-center items-center bg-black bg-opacity-40 rounded-full opacity-0 transition-all cursor-pointer group-hover:visible group-hover:opacity-100"
+              className="absolute inset-0 flex items-center justify-center invisible transition-all bg-black rounded-full opacity-0 cursor-pointer bg-opacity-40 group-hover:visible group-hover:opacity-100"
             >
               <span className="text-sm text-white">사진 변경</span>
             </label>
@@ -250,7 +250,7 @@ function MyPageContent() {
           </div>
           <Image src="/icons/heart.png" alt="heart" width={20} height={20} />
           <div className="relative w-16 h-16 group md:w-24 md:h-24">
-            <div className="overflow-hidden w-16 h-16 rounded-full md:w-24 md:h-24">
+            <div className="w-16 h-16 overflow-hidden rounded-full md:w-24 md:h-24">
               <Image
                 src={dogPhotoPreview}
                 alt="dog"
@@ -261,7 +261,7 @@ function MyPageContent() {
             </div>
             <label
               htmlFor="dogPhoto"
-              className="flex absolute inset-0 invisible justify-center items-center bg-black bg-opacity-40 rounded-full opacity-0 transition-all cursor-pointer group-hover:visible group-hover:opacity-100"
+              className="absolute inset-0 flex items-center justify-center invisible transition-all bg-black rounded-full opacity-0 cursor-pointer bg-opacity-40 group-hover:visible group-hover:opacity-100"
             >
               <span className="text-sm text-white">사진 변경</span>
             </label>
@@ -293,15 +293,15 @@ function MyPageContent() {
           <span className="text-lg font-bold">{dogInfo.togetherFor}일째</span>
         </span>
       </div>
-      <div className="overflow-y-auto px-4 w-full">
+      <div className="w-full px-4 overflow-y-auto">
         {Object.entries(mypageList).map(([key, value]) => (
           <div key={key}>
             <button
               type="button"
               onClick={() => handleMenuClick(key, value)}
-              className="flex justify-between items-center py-2 w-full"
+              className="flex items-center justify-between w-full py-2"
             >
-              <div className="flex gap-3 items-center">
+              <div className="flex items-center gap-3">
                 <Image src={value.icon} alt={key} width={24} height={24} />
                 <span className="text-lg font-medium">{value.label}</span>
               </div>
@@ -325,7 +325,7 @@ function MyPageContent() {
             </button>
 
             {hasFields(value) && openSections[key] && (
-              <div className="pb-4 pl-11 space-y-3">
+              <div className="pb-4 space-y-3 pl-11">
                 {value.fields.map((field, index) => (
                   <div
                     key={index}
@@ -376,27 +376,23 @@ function MyPageContent() {
           </div>
         ))}
       </div>
-      <button
-        type="submit"
-        className="overflow-hidden relative px-8 py-2 mx-auto text-lg font-bold text-white bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-400 rounded-full border-2 border-yellow-300 shadow-lg transition-all duration-300 transform group hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-500 hover:shadow-xl hover:scale-105 hover:border-yellow-400 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
-        style={{
-          background:
-            "linear-gradient(135deg, #FFC940 0%, #FFD700 50%, #FFA500 100%)",
-        }}
-        disabled={isSubmitting}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent justify-center via-white to-transparent opacity-20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+      <div className="flex justify-center">
+        <button
+          type="submit"
+          className="flex items-center gap-2 px-4 py-2 text-lg font-extrabold text-white transition-all duration-300 transform w-fit bg-main-yellow rounded-2xl hover:bg-yellow-500 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
+          disabled={isSubmitting}
+        >
+          <span className="relative z-10 tracking-wider">
+            {isSubmitting ? "저장 중..." : "저장"}
+          </span>
 
-        <span className="relative z-10 tracking-wider">
-          {isSubmitting ? "저장 중..." : "저장"}
-        </span>
-
-        {isSubmitting && (
-          <div className="absolute right-3 top-1/2 transition-transform duration-300 transform -translate-y-1/2 group-hover:scale-110">
-            <div className="w-5 h-5 rounded-full border-2 border-white animate-spin border-t-transparent"></div>
-          </div>
-        )}
-      </button>
+          {isSubmitting && (
+            <div className="absolute transition-transform duration-300 transform -translate-y-1/2 right-3 top-1/2 group-hover:scale-110">
+              <div className="w-5 h-5 border-2 border-white rounded-full animate-spin border-t-transparent"></div>
+            </div>
+          )}
+        </button>
+      </div>
     </form>
   );
 }

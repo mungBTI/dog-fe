@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const footerArry = [
   {
     label: "홈화면",
-    iconsrc: "/icons/dog_foot.svg",
+    iconsrc: "/icons/home.png",
     path: "/main",
   },
   {
@@ -16,7 +16,7 @@ const footerArry = [
   },
   {
     label: "마이페이지",
-    iconsrc: "/icons/person.png",
+    iconsrc: "/icons/mypage.png",
     path: "/mypage",
   },
 ];
@@ -24,14 +24,14 @@ export default function Footer() {
   const router = useRouter();
   return (
     <div
-      className="flex flex-row items-center justify-between w-full px-4 md:px-0"
+      className="flex flex-row items-center justify-between w-full px-4 py-6 md:px-0"
       role="navigation"
       aria-label="footer navigation"
     >
       {footerArry.map((item) => {
         return (
           <button
-            className="flex flex-col items-center justify-center w-fit"
+            className="flex flex-col items-center justify-center p-3 transition-all duration-200 w-fit rounded-xl hover:bg-yellow-50 hover:scale-110 active:scale-95 active:bg-yellow-100"
             key={item.label}
             aria-label={`go to ${item.label}`}
             onClick={() => {
@@ -41,8 +41,9 @@ export default function Footer() {
             <Image
               src={item.iconsrc}
               alt={`${item.label} icon`}
-              width={20}
-              height={20}
+              width={28}
+              height={28}
+              className="transition-all duration-200 hover:brightness-110"
             />
           </button>
         );

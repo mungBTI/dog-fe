@@ -13,7 +13,7 @@ export default function UserInfoBox({
   }
   return (
     <div
-      className={`${layout.flex.list.full} items-end  gap-2 px-4 py-4 md:py-12 md:px-0`}
+      className={`${layout.flex.list.full} items-end  gap-2 px-4 py-4 md:py-12 md:px-0 h-fit`}
     >
       <div className="flex flex-row items-center gap-3">
         <div className="w-[30px] h-[30px] rounded-full overflow-hidden">

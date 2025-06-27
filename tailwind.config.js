@@ -11,9 +11,9 @@ module.exports = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        paper: "url('/image/paper_texture.jpeg')",
-      },
+      // backgroundImage: {
+      //   paper: "url('/image/paper_texture.jpeg')",
+      // },
       colors: {
         "main-yellow": "#FFC940",
       },

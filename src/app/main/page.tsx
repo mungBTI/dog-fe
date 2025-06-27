@@ -10,10 +10,12 @@ import axios from "axios";
 import UserInfoBox from "./_components/UserInfo";
 import { layout } from "@/styles/layout";
 import GeneralLoading from "../components/GeneralLoading";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../components/AuthProvider";
 
 export default function MainContent() {
+  const [isDraft, setIsDraft] = useState<boolean>(false);
+
   const router = useRouter();
   const { logout } = useAuth();
 
@@ -74,15 +76,18 @@ export default function MainContent() {
   return (
     <div className={`${layout.flex.list.full} justify-between`}>
       <Header />
-      <div className="flex flex-col justify-between h-full">
+      <div
+        className="flex flex-col justify-between"
+        style={{ height: "inherit" }}
+      >
         {userInfo && dogInfo && (
           <UserInfoBox userInfo={userInfo.user} dogInfo={dogInfo.dog} />
         )}
         <div
           className={`${layout.flex.list.full} items-center justify-center p-4 `}
         >
-          <Dog />
-          <TodayQuestion />
+          <Dog isDraft={isDraft} />
+          <TodayQuestion setIsDraft={setIsDraft} />
         </div>
       </div>
       <Footer />

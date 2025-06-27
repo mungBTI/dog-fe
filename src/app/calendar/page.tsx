@@ -95,7 +95,7 @@ export default function Calendar() {
     <div className={`${layout.flex.list.full} justify-between`}>
       <Header />
       <div
-        className={`${layout.flex.list.full} items-center justify-start pt-6`}
+        className={`${layout.flex.list.full} items-center justify-start pt-6 `}
       >
         <DayPicker
           hideNavigation
@@ -151,55 +151,56 @@ export default function Calendar() {
             },
           }}
           classNames={{
-            root: `w-[300px] md:w-[400px] h-[360px] md:h-[400px] shadow-lg p-0 m-0 bg-white rounded-lg`,
-            months: `w-full h-full flex items-center justify-center`,
-            month: `w-full h-full flex flex-col justify-center p-4`,
+            root: `w-full p-0 mb-4 rounded-lg`,
+            months: `w-full h-full flex items-center `,
+            month: `w-full h-full flex flex-col p-4`,
             caption_label: `hidden`,
             dropdowns: `flex flex-row-reverse justify-start gap-2 h-8 font-semibold mb-3`,
             years_dropdown: `text-center`,
             months_dropdown: `text-center`,
-            month_grid: `w-full grid-cols-7`,
             month_caption: `flex items-center justify-start`,
+          }}
+          style={{
+            height: "fit-content",
+            boxShadow: "0px 1px 8px #d9d9d9",
           }}
         />
         <div>
-          <div className="flex justify-end w-[300px] md:w-[400px] mt-1 text-main-yellow font-semibold">
-            <button
-              onClick={() => {
-                setMonth(today);
-                setSelected(today);
-              }}
-            >
-              오늘로 돌아가기
-            </button>
+          <div>
+            <div className="flex justify-end w-[300px] md:w-[400px] mt-1 text-main-yellow font-semibold">
+              <button
+                onClick={() => {
+                  setMonth(today);
+                  setSelected(today);
+                }}
+              >
+                오늘로 돌아가기
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="flex w-[300px] md:w-[400px] h-3 md:h-4 text-left mt-3 text-[16px] md:text-lg font-semibold">
-          <div>{selected?.toLocaleDateString()}</div>
-        </div>
-        <div className="w-[300px] md:w-[400px] min-h-12 md:min-h-14 text-left mt-3 text-[16px] md:text-lg font-semibold">
-          {questionData?.questionText ? (
-            <p>{questionData?.questionText}</p>
-          ) : (
-            <p>기록하지 않은 날입니다.</p>
+          <div className="flex w-[300px] md:w-[400px] h-3 md:h-4 text-left mt-3 text-[16px] md:text-lg font-semibold">
+            <div>{selected?.toLocaleDateString()}</div>
+          </div>
+          <div className="w-[300px] md:w-[400px] min-h-12 md:min-h-14 text-left mt-3 text-[16px] md:text-lg font-semibold">
+            {questionData?.questionText ? (
+              <p>{questionData?.questionText}</p>
+            ) : (
+              <p>기록하지 않은 날입니다.</p>
+            )}
+          </div>
+          {questionData && (
+            <div className="flex justify-center">
+              <button
+                type="button"
+                title="수정"
+                className="flex items-center gap-2 px-4 py-2 text-lg font-extrabold text-white transition-all duration-300 transform w-fit bg-main-yellow rounded-2xl hover:bg-yellow-500 hover:scale-105 hover:shadow-lg active:scale-95 active:shadow-sm"
+                onClick={() => onClick(questionData.id)}
+              >
+                <span className="relative z-10 tracking-wider">수정</span>
+              </button>
+            </div>
           )}
         </div>
-        {questionData && (
-          <button
-            type="button"
-            title="수정"
-            className="relative px-6 py-1 mx-auto overflow-hidden text-[16px] md:text-lg font-bold text-white transition-all duration-300 transform border-2 border-yellow-300 rounded-full shadow-lg group bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-400 hover:from-yellow-500 hover:via-yellow-600 hover:to-amber-500 hover:shadow-xl hover:scale-105 hover:border-yellow-400 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
-            style={{
-              background:
-                "linear-gradient(135deg, #FFC940 0%, #FFD700 50%, #FFA500 100%)",
-            }}
-            onClick={() => onClick(questionData.id)}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent justify-center via-white to-transparent opacity-20 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-
-            <span className="relative z-10 tracking-wider">수정</span>
-          </button>
-        )}
       </div>
       <Footer />
     </div>
