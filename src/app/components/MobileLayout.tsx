@@ -4,7 +4,7 @@ export default function MobileLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="w-full h-screen py-4 md:container md:mx-auto md:max-w-sm md:py-8">
+    <div className="px-4 py-2 mx-auto w-full max-w-sm min-h-screen sm:py-4 md:max-w-md lg:max-w-lg">
       {children}
     </div>
   );

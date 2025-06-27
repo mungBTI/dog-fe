@@ -10,10 +10,12 @@ import axios from "axios";
 import UserInfoBox from "./_components/UserInfo";
 import { layout } from "@/styles/layout";
 import GeneralLoading from "../components/GeneralLoading";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useAuth } from "../components/AuthProvider";
 
 export default function MainContent() {
   const router = useRouter();
+  const { logout } = useAuth();
 
   const {
     data: userInfo,
@@ -35,41 +37,44 @@ export default function MainContent() {
     retry: false,
   });
 
-  useEffect(() => {
-    console.log("useEffect");
-    if (userLoading || dogLoading) return;
+  const isLoading = userLoading || dogLoading;
 
-    if (userError || dogError) {
-      if (axios.isAxiosError(userError) && userError.response?.status === 401) {
-        router.push("/login");
-        return;
-      }
-      if (axios.isAxiosError(dogError) && dogError.response?.status === 401) {
-        router.push("/login");
-        return;
-      }
+  const errorHandler = useMemo(() => {
+    if (isLoading) return null;
 
-      if (
-        userInfo &&
-        axios.isAxiosError(dogError) &&
-        dogError.response?.data?.error_code === 1006
-      ) {
+    const isUnauthorized = (error: unknown) =>
+      axios.isAxiosError(error) && error.response?.status === 401;
+
+    if (isUnauthorized(userError) || isUnauthorized(dogError)) {
+      return () => logout();
+    }
+
+    if (
+      userInfo &&
+      axios.isAxiosError(dogError) &&
+      dogError.response?.data?.error_code === 1006
+    ) {
+      return () => {
         const params = new URLSearchParams({
           nickName: userInfo.user.nickName,
           profilePhotoUrl: userInfo.user.profilePhotoUrl,
         });
         router.replace(`/dog/register?${params.toString()}`);
-        return;
-      }
+      };
     }
-  }, [userError, dogError, userInfo, router, userLoading, dogLoading]);
+    return null;
+  }, [userError, dogError, userInfo, router, isLoading, logout]);
 
-  if (userLoading || dogLoading) return <GeneralLoading />;
+  useEffect(() => {
+    errorHandler?.();
+  }, [errorHandler]);
+
+  if (isLoading) return <GeneralLoading />;
 
   return (
     <div className={`${layout.flex.list.full} justify-between`}>
       <Header />
-      <div className="flex flex-col justify-between h-full ">
+      <div className="flex flex-col justify-between h-full">
         {userInfo && dogInfo && (
           <UserInfoBox userInfo={userInfo.user} dogInfo={dogInfo.dog} />
         )}

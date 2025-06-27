@@ -3,6 +3,7 @@ import { Ownglyph_wiseelist } from "@/lib/config/fonts";
 import "./globals.css";
 import Providers from "./Providers";
 import ToastProvider from "./components/ToastProvider";
+import AuthProvider from "./components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "두둥멍",
@@ -19,7 +20,9 @@ export default function RootLayout({
       <body
         className={`${Ownglyph_wiseelist.className} flex justify-center w-full min-h-screen`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <AuthProvider>{children}</AuthProvider>
+        </Providers>
         <ToastProvider />
       </body>
     </html>

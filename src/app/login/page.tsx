@@ -16,10 +16,10 @@ function LoginContent() {
       toast.error("다시 로그인 해주세요.", {
         icon: "\u{1F512}",
       });
+      // URL에서 error 파라미터만 제거
+      const clearUrl = window.location.pathname;
+      router.replace(clearUrl);
     }
-
-    const clearUrl = window.location.pathname;
-    router.replace(clearUrl);
   }, [searchParams, router]);
 
   return (
@@ -36,6 +36,7 @@ function LoginContent() {
     </div>
   );
 }
+
 export default function Login() {
   return (
     <Suspense fallback={<div>Loading...</div>}>

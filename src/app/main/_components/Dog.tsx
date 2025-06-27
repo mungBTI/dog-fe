@@ -6,8 +6,8 @@ export default function Dog() {
       <Image
         src="/image/dog_illus/main_dog.png"
         alt="dog"
-        width={300}
-        height={300}
+        width={200}
+        height={200}
         priority
         loading="eager"
         className="w-[200px] h-[200px] md:w-[300px] md:h-[300px]"
