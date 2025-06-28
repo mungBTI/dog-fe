@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 
 const modeImogiPath: Record<string, string> = {
-  EXCITED: "excited_imogi",
+  LOVE: "love_imogi",
   HAPPY: "happy_imogi",
   ANGRY: "angry_imogi",
   SAD: "sad_imogi",
