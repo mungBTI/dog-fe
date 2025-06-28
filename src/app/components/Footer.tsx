@@ -24,7 +24,7 @@ export default function Footer() {
   const router = useRouter();
   return (
     <div
-      className="flex flex-row items-center justify-between w-full px-4 py-6 md:px-0"
+      className="flex flex-row items-center justify-between w-full px-4 py-6 pt-10 md:px-0 "
       role="navigation"
       aria-label="footer navigation"
     >

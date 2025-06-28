@@ -57,15 +57,15 @@ export default function TodayQuestion({
   }, [link, router]);
 
   return (
-    <div className="relative w-full p-6 mx-4">
+    <div className="relative w-full p-4 mx-4">
       <div className="w-full p-4 mb-6 text-center bg-yellow-50 rounded-3xl">
         <h2
-          className="mb-3 text-2xl font-bold leading-relaxed"
+          className="mb-3 font-bold leading-relaxed"
           style={{ color: "#F5BC25" }}
         >
           {todayQuestion.title}
         </h2>
-        <p className="p-4 mb-3 text-lg font-medium leading-relaxed text-gray-800 bg-white/80 rounded-3xl">
+        <p className="p-4 mb-3 font-medium leading-relaxed text-gray-800 bg-white/80 rounded-3xl">
           {todayQuestion.question}
         </p>
       </div>

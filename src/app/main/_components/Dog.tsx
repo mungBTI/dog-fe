@@ -15,7 +15,7 @@ export default function Dog({ isDraft }: { isDraft: boolean }) {
         />
       ) : (
         <Image
-          src="/image/dog_illus/sitting_dog.png"
+          src="/image/dog_illus/main_dog.png"
           alt="dog"
           width={150}
           height={150}
