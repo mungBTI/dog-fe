@@ -65,9 +65,11 @@ export default function TodayQuestion({
         >
           {todayQuestion.title}
         </h2>
-        <p className="p-4 mb-3 font-medium leading-relaxed text-gray-800 bg-white/80 rounded-3xl">
-          {todayQuestion.question}
-        </p>
+        {todayQuestion.question && (
+          <p className="p-4 mb-3 font-medium leading-relaxed text-gray-800 bg-white/80 rounded-3xl">
+            {todayQuestion.question}
+          </p>
+        )}
       </div>
       <div className="flex justify-center">
         <button
