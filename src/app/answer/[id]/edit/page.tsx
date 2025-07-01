@@ -1,12 +1,7 @@
 "use client";
 
-import { layout } from "@/styles/layout";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import Question from "../../_components/Question";
-import AnswerInfo from "../../_components/AnswerInfo";
-import Upload from "../../_components/Upload";
-import ImagePreview from "../../_components/ImagePreview";
 import {
   EditAnswerForm,
   getAnswerDetailResponse,
@@ -15,7 +10,7 @@ import {
 } from "@/types/answer";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getDetailAnswer } from "@/api/answer/getAnswer";
-import { use, useEffect, useRef, useState } from "react";
+import { use, useEffect, useState } from "react";
 import GeneralLoading from "@/app/components/GeneralLoading";
 import Mood from "../../_components/Mood";
 import { uploadPhoto } from "@/api/answer/postAnswer";
@@ -23,16 +18,15 @@ import { patchAnswer } from "@/api/answer/patchAnswer";
 import { deleteAnswer } from "@/api/answer/deleteAnswer";
 import toast from "react-hot-toast";
 import DeleteConfirmModal from "../../_components/DeleteConfirmModal";
+import AnswerHeader from "../../_components/AnswerHearder";
+import AnswerText from "../../_components/AnswerText";
+import AnswerPhoto from "../../_components/AnswerPhoto";
 
 export default function Edit({ params }: getAnswerId) {
   const answerId = use(params).id;
   const router = useRouter();
   const queryClient = useQueryClient();
-
-  const [previewImage, setPreviewImage] = useState<string[] | null>();
-  const [previewSize, setPreviewSize] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const {
@@ -46,7 +40,6 @@ export default function Edit({ params }: getAnswerId) {
 
   const currentMood = watch("mood");
   const answerText = watch("answerText");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { ref: hookFormRef, ...rest } = register("answerText", {
     required: {
       value: true,
@@ -74,18 +67,6 @@ export default function Edit({ params }: getAnswerId) {
     }
   }, [getDetailData, reset]);
 
-  const adjustHeight = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  };
-
-  useEffect(() => {
-    adjustHeight();
-  }, [answerText]);
-
   const uploadMutation = useMutation({
     mutationFn: uploadPhoto,
   });
@@ -98,7 +79,6 @@ export default function Edit({ params }: getAnswerId) {
         queryKey: ["getDetailAnswer", answerId],
       });
       setSelectedFiles([]);
-      setPreviewImage(null);
     },
     onError: (error: unknown) => {
       console.error(`오류: ${(error as Error).message}`);
@@ -124,41 +104,8 @@ export default function Edit({ params }: getAnswerId) {
     return <GeneralLoading />;
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) {
-      return;
-    }
-    const fileArray = Array.from(files);
-    if (fileArray.length > 1) {
-      toast.error("사진 선택은 1장만 가능합니다.", {
-        icon: "⚠️",
-      });
-      e.target.value = "";
-      return;
-    }
-
-    const file = fileArray[0];
-
-    const maxSizeInMB = 10;
-    const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
-    const currentSizeInMB = (file.size / (1024 * 1024)).toFixed(2);
-
-    if (file.size > maxSizeInBytes) {
-      toast.error(
-        `현재 사진 크기는 ${currentSizeInMB}MB입니다. ${maxSizeInMB}MB 이하로 선택해주세요.`,
-        {
-          icon: "⚠️",
-        }
-      );
-      e.target.value = "";
-      return;
-    }
-
-    const previewUrls = URL.createObjectURL(file);
-    setPreviewImage([previewUrls]);
-    setSelectedFiles(fileArray);
-    setPreviewSize(currentSizeInMB);
+  const onFileSelect = (files: File[]) => {
+    setSelectedFiles(files);
   };
 
   const handleMoodSelect = (mood: string) => {
@@ -206,90 +153,36 @@ export default function Edit({ params }: getAnswerId) {
     deleteMutation.mutate({ answerId: answerId });
   };
 
-  const today = new Date();
-  const formattedToday = `${today.getFullYear()}-${String(
-    today.getMonth() + 1
-  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const isToday = getDetailData?.answer.dateKey === formattedToday;
-
   return (
     <div className="flex flex-col w-full h-full overflow-x-hidden overflow-y-auto scrollbar-gutter-stable p-2">
       <Mood mood={currentMood} onMoodSelect={handleMoodSelect} />
-      <div className="flex flex-col items-start justify-start gap-1 w-full my-3">
-        <Question text={getDetailData?.answer.questionText} />
-        <div className="flex justify-between w-full">
-          <AnswerInfo
-            count={getDetailData?.answer.order ?? 1}
-            date={getDetailData?.answer.dateKey}
-          />
-          <div className="flex items-center gap-2">
-            <button type="submit" form="answer-form">
-              수정
-            </button>
-            {!isToday && (
-              <>
-                <button onClick={() => setIsDeleteModalOpen(true)}>삭제</button>
-                <DeleteConfirmModal
-                  isOpen={isDeleteModalOpen}
-                  onClose={() => setIsDeleteModalOpen(false)}
-                  onConfirm={handleDelete}
-                />
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+      <AnswerHeader
+        questionText={getDetailData?.answer.questionText ?? ""}
+        order={getDetailData?.answer.order ?? 1}
+        date={getDetailData?.answer.dateKey ?? ""}
+        answerMode="edit"
+        onOpen={() => setIsDeleteModalOpen(true)}
+      />
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+      />
       <div className="flex w-full h-full flex-wrap gap-1 items-start justify-center">
         <form
           id="answer-form"
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col justify-start gap-2 w-full min-h-[300px] py-2"
         >
-          <textarea
-            {...rest}
-            ref={(e) => {
-              hookFormRef(e);
-              textareaRef.current = e;
-            }}
-            className="w-full bg-inherit resize-none overflow-hidden border-none outline-none"
-            placeholder="답변 작성..."
-            onInput={adjustHeight}
+          <AnswerText
+            register={{ ref: hookFormRef, ...rest }}
+            error={errors.answerText?.message}
+            answerText={answerText}
           />
-          {errors.answerText && (
-            <p className="text-main-yellow text-sm">
-              {errors.answerText.message}
-            </p>
-          )}
-          <div>
-            <input
-              id="picture"
-              type="file"
-              multiple={true}
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            {!previewImage && getDetailData?.answer?.photoUrls[0] && (
-              <ImagePreview previewImage={getDetailData.answer.photoUrls[0]} />
-            )}
-
-            {previewImage?.[0] && (
-              <ImagePreview
-                previewImage={previewImage[0]}
-                previewSize={previewSize}
-              />
-            )}
-            <label
-              htmlFor="picture"
-              className={`${layout.flex.column.center} w-full bg-white/50 cursor-pointer py-2 mt-2`}
-            >
-              {(previewImage && previewImage[0]) ||
-              getDetailData?.answer.photoUrls[0] ? (
-                <Upload uploadType="사진 변경" />
-              ) : (
-                <Upload uploadType="사진 업로드" />
-              )}
-            </label>
-          </div>
+          <AnswerPhoto
+            currentPhotoUrls={getDetailData?.answer.photoUrls}
+            onFileSelect={onFileSelect}
+          />
         </form>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { UseFormRegisterReturn } from "react-hook-form";
+
 export type answerId = {
   answerId: string;
 };
@@ -60,6 +62,20 @@ export type Text = {
 export type Info = {
   count: number;
   date: string | undefined;
+};
+
+export type AnswerHeaderProps = {
+  questionText: string;
+  order: number;
+  date: string;
+  answerMode: "new" | "edit";
+  onOpen?: () => void;
+};
+
+export type AnswerTextProps = {
+  register: UseFormRegisterReturn;
+  error?: string;
+  answerText?: string;
 };
 
 export type ImagePreviewControl = {
